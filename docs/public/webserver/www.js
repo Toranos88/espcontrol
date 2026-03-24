@@ -68,7 +68,7 @@
 
     // Screen preview
     ".sp-wrap{display:flex;justify-content:center;padding:20px 16px 4px}" +
-    ".sp-screen{width:100%;max-width:480px;aspect-ratio:1024/600;background:#000;" +
+    ".sp-screen{width:100%;aspect-ratio:1024/600;background:#000;" +
     "border-radius:10px;position:relative;overflow:hidden;" +
     "box-shadow:0 2px 20px rgba(0,0,0,.35);border:2px solid #1a1a1a;" +
     "container-type:inline-size;font-family:Roboto,sans-serif;user-select:none}" +
