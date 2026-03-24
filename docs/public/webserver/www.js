@@ -1068,6 +1068,8 @@
         els.setBacklightVal.textContent = br;
         return;
       }
+
+      console.log("[SSE] unhandled:", id, val);
     });
 
     // Log events
