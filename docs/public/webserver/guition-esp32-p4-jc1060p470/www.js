@@ -223,7 +223,7 @@
 
     // App shell
     "#sp-app{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" +
-    "color:var(--text);max-width:960px;margin:0 auto;-webkit-font-smoothing:antialiased}" +
+    "color:var(--text);max-width:480px;margin:0 auto;-webkit-font-smoothing:antialiased}" +
     "esp-app{display:none !important}" +
 
     // Header
@@ -242,8 +242,8 @@
     "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
 
     // Screen preview
-    ".sp-wrap{display:flex;justify-content:center;padding:20px var(--gap) 4px}" +
-    ".sp-screen{width:100%;aspect-ratio:1024/600;background:#000;" +
+    ".sp-wrap{display:flex;justify-content:center;padding:20px var(--gap) 4px;overflow:visible}" +
+    ".sp-screen{width:200%;max-width:960px;aspect-ratio:1024/600;background:#000;" +
     "border-radius:var(--radius);position:relative;overflow:hidden;" +
     "box-shadow:0 2px 20px rgba(0,0,0,.35);border:2px solid var(--surface);" +
     "container-type:inline-size;font-family:Roboto,sans-serif;user-select:none}" +
@@ -278,7 +278,7 @@
     ".sp-hint{text-align:center;font-size:.75rem;opacity:.4;padding:6px 0 12px}" +
 
     // Config area
-    ".sp-config{padding:0 var(--gap) var(--gap)}" +
+    ".sp-config{padding:var(--gap) var(--gap) var(--gap)}" +
     ".sp-section-title{font-size:.8rem;font-weight:600;color:var(--text2);" +
     "margin:var(--gap) 0 8px;text-transform:uppercase;letter-spacing:.5px}" +
 
@@ -345,8 +345,9 @@
 
     // Toggle switch
     ".sp-toggle-row{display:flex;align-items:center;justify-content:space-between;" +
-    "min-height:36px;margin-bottom:12px}" +
+    "min-height:36px;margin-bottom:4px}" +
     ".sp-toggle-row:last-child{margin-bottom:0}" +
+    ".sp-cond-field+.sp-toggle-row{margin-top:16px}" +
     ".sp-toggle-row span{font-size:.9rem}" +
     ".sp-toggle{position:relative;width:44px;height:24px;flex-shrink:0}" +
     ".sp-toggle input{opacity:0;width:0;height:0;position:absolute}" +
@@ -364,7 +365,7 @@
     ".sp-segment button.active{background:var(--accent);color:#fff}" +
 
     // Conditional field (shown below toggle when enabled)
-    ".sp-cond-field{padding:4px 0 8px;display:none}" +
+    ".sp-cond-field{padding:0 0 4px;display:none}" +
     ".sp-cond-field.sp-visible{display:block}" +
 
     // Range slider
@@ -811,6 +812,7 @@
     var ssBody = document.createElement("div");
     var ssMode = state.presenceEntity ? "sensor" : "timer";
 
+    ssBody.appendChild(fieldLabel("Mode"));
     var segment = document.createElement("div");
     segment.className = "sp-segment";
     var timerBtn = document.createElement("button");
@@ -825,6 +827,7 @@
 
     // Timer panel
     var timerPanel = document.createElement("div");
+    timerPanel.appendChild(fieldLabel("Timeout"));
     var timeoutSelect = document.createElement("select");
     timeoutSelect.className = "sp-select";
     timeoutSelect.id = "sp-set-ss-timeout";
@@ -853,6 +856,7 @@
 
     // Sensor panel
     var sensorPanel = document.createElement("div");
+    sensorPanel.appendChild(fieldLabel("Presence Entity"));
     var presInp = textInput("sp-set-presence", "", "Presence sensor entity");
     sensorPanel.appendChild(presInp);
     bindTextPost(presInp, "Presence Sensor Entity", {});
