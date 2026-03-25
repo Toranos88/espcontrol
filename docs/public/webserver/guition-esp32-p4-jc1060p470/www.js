@@ -357,6 +357,12 @@
     ".sp-toggle input:checked+.sp-toggle-track{background:var(--accent);border-color:var(--accent)}" +
     ".sp-toggle input:checked+.sp-toggle-track:before{transform:translateX(20px)}" +
 
+    // Segment control
+    ".sp-segment{display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px}" +
+    ".sp-segment button{flex:1;padding:8px 0;background:var(--surface2);color:var(--text2);" +
+    "border:none;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s;font-family:inherit}" +
+    ".sp-segment button.active{background:var(--accent);color:#fff}" +
+
     // Conditional field (shown below toggle when enabled)
     ".sp-cond-field{padding:4px 0 8px;display:none}" +
     ".sp-cond-field.sp-visible{display:block}" +
@@ -762,14 +768,12 @@
     var blBody = document.createElement("div");
 
     var daySlider = createRangeSlider("Daytime Brightness", state.brightnessDayVal, "Screen: Daytime Brightness");
-    blBody.appendChild(daySlider.label);
-    blBody.appendChild(daySlider.row);
+    blBody.appendChild(daySlider.wrap);
     els.setDayBrightness = daySlider.range;
     els.setDayBrightnessVal = daySlider.val;
 
     var nightSlider = createRangeSlider("Nighttime Brightness", state.brightnessNightVal, "Screen: Nighttime Brightness");
-    blBody.appendChild(nightSlider.label);
-    blBody.appendChild(nightSlider.row);
+    blBody.appendChild(nightSlider.wrap);
     els.setNightBrightness = nightSlider.range;
     els.setNightBrightnessVal = nightSlider.val;
 
@@ -786,7 +790,7 @@
     var tempBody = document.createElement("div");
 
     var indoor = createEntityToggleSection("Indoor Temperature", "sp-set-indoor-toggle", state._indoorOn,
-      "Indoor Temp Enable", "Indoor Temp Entity", "Indoor Temp Entity", "e.g. sensor.indoor_temperature");
+      "Indoor Temp Enable", "Indoor Temp Entity", "Indoor Temp Entity", "sensor.indoor_temperature");
     tempBody.appendChild(indoor.toggle.row);
     tempBody.appendChild(indoor.field);
     els.setIndoorToggle = indoor.toggle.input;
@@ -794,7 +798,7 @@
     els.setIndoorEntity = indoor.input;
 
     var outdoor = createEntityToggleSection("Outdoor Temperature", "sp-set-outdoor-toggle", state._outdoorOn,
-      "Outdoor Temp Enable", "Outdoor Temp Entity", "Outdoor Temp Entity", "e.g. sensor.outdoor_temperature");
+      "Outdoor Temp Enable", "Outdoor Temp Entity", "Outdoor Temp Entity", "sensor.outdoor_temperature");
     tempBody.appendChild(outdoor.toggle.row);
     tempBody.appendChild(outdoor.field);
     els.setOutdoorToggle = outdoor.toggle.input;
@@ -805,33 +809,66 @@
 
     // --- Screensaver ---
     var ssBody = document.createElement("div");
+    var ssMode = state.presenceEntity ? "sensor" : "timer";
 
-    ssBody.appendChild(fieldLabel("Idle Timeout"));
-    var numRow = document.createElement("div");
-    numRow.className = "sp-number-row";
-    var numInp = document.createElement("input");
-    numInp.type = "number";
-    numInp.className = "sp-number";
-    numInp.id = "sp-set-ss-timeout";
-    numInp.min = "30";
-    numInp.max = "1800";
-    numInp.step = "30";
-    numInp.value = "300";
-    var numUnit = document.createElement("span");
-    numUnit.className = "sp-number-unit";
-    numUnit.textContent = "seconds";
-    numInp.addEventListener("blur", function () { postNumber("Screensaver Timeout", this.value); });
-    numInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
-    numRow.appendChild(numInp);
-    numRow.appendChild(numUnit);
-    ssBody.appendChild(numRow);
-    els.setSSTimeout = numInp;
+    var segment = document.createElement("div");
+    segment.className = "sp-segment";
+    var timerBtn = document.createElement("button");
+    timerBtn.textContent = "Timer";
+    timerBtn.type = "button";
+    var sensorBtn = document.createElement("button");
+    sensorBtn.textContent = "Sensor";
+    sensorBtn.type = "button";
+    segment.appendChild(timerBtn);
+    segment.appendChild(sensorBtn);
+    ssBody.appendChild(segment);
 
-    ssBody.appendChild(fieldLabel("Presence Sensor Entity"));
-    var presInp = textInput("sp-set-presence", "", "e.g. binary_sensor.presence");
-    ssBody.appendChild(presInp);
+    // Timer panel
+    var timerPanel = document.createElement("div");
+    var timeoutSelect = document.createElement("select");
+    timeoutSelect.className = "sp-select";
+    timeoutSelect.id = "sp-set-ss-timeout";
+    var timeoutOptions = [
+      { label: "5 minutes", value: 300 },
+      { label: "10 minutes", value: 600 },
+      { label: "15 minutes", value: 900 },
+      { label: "20 minutes", value: 1200 },
+      { label: "30 minutes", value: 1800 },
+      { label: "45 minutes", value: 2700 },
+      { label: "1 hour", value: 3600 },
+    ];
+    timeoutOptions.forEach(function (opt) {
+      var o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = opt.label;
+      if (opt.value === state.screensaverTimeout) o.selected = true;
+      timeoutSelect.appendChild(o);
+    });
+    timeoutSelect.addEventListener("change", function () {
+      postNumber("Screensaver Timeout", this.value);
+    });
+    timerPanel.appendChild(timeoutSelect);
+    ssBody.appendChild(timerPanel);
+    els.setSSTimeout = timeoutSelect;
+
+    // Sensor panel
+    var sensorPanel = document.createElement("div");
+    var presInp = textInput("sp-set-presence", "", "Presence sensor entity");
+    sensorPanel.appendChild(presInp);
     bindTextPost(presInp, "Presence Sensor Entity", {});
+    ssBody.appendChild(sensorPanel);
     els.setPresence = presInp;
+
+    function setSsMode(mode) {
+      ssMode = mode;
+      timerBtn.className = mode === "timer" ? "active" : "";
+      sensorBtn.className = mode === "sensor" ? "active" : "";
+      timerPanel.style.display = mode === "timer" ? "" : "none";
+      sensorPanel.style.display = mode === "sensor" ? "" : "none";
+    }
+    timerBtn.addEventListener("click", function () { setSsMode("timer"); });
+    sensorBtn.addEventListener("click", function () { setSsMode("sensor"); });
+    setSsMode(ssMode);
 
     config.appendChild(makeCollapsibleCard("Screensaver", ssBody, true));
 
@@ -886,10 +923,13 @@
     fwBody.appendChild(autoUpdateToggle.row);
     autoUpdateToggle.input.addEventListener("change", function () {
       postSwitch("Firmware: Auto Update", this.checked);
+      if (els.updateFreqWrap) els.updateFreqWrap.style.display = this.checked ? "" : "none";
     });
     els.setAutoUpdate = autoUpdateToggle.input;
 
-    fwBody.appendChild(fieldLabel("Update Frequency"));
+    var freqWrap = document.createElement("div");
+    freqWrap.style.display = state.autoUpdate ? "" : "none";
+    freqWrap.appendChild(fieldLabel("Update Frequency"));
     var freqSelect = document.createElement("select");
     freqSelect.className = "sp-select";
     freqSelect.id = "sp-set-update-freq";
@@ -903,7 +943,9 @@
     freqSelect.addEventListener("change", function () {
       postSelect("Firmware: Update Frequency", this.value);
     });
-    fwBody.appendChild(freqSelect);
+    freqWrap.appendChild(freqSelect);
+    fwBody.appendChild(freqWrap);
+    els.updateFreqWrap = freqWrap;
     els.setUpdateFreq = freqSelect;
 
     config.appendChild(makeCollapsibleCard("Firmware", fwBody, true));
@@ -1035,7 +1077,9 @@
   }
 
   function createRangeSlider(label, initial, postName) {
-    var lbl = fieldLabel(label);
+    var wrap = document.createElement("div");
+    wrap.className = "sp-field";
+    wrap.appendChild(fieldLabel(label));
     var row = document.createElement("div");
     row.className = "sp-range-row";
     var range = document.createElement("input");
@@ -1052,13 +1096,13 @@
     range.addEventListener("change", function () { postNumber(postName, this.value); });
     row.appendChild(range);
     row.appendChild(val);
-    return { label: lbl, row: row, range: range, val: val };
+    wrap.appendChild(row);
+    return { wrap: wrap, range: range, val: val };
   }
 
   function createEntityToggleSection(label, id, checked, switchName, entityLabel, entityPostName, placeholder) {
     var toggle = toggleRow(label, id, checked);
     var field = condField();
-    field.appendChild(fieldLabel(entityLabel));
     var inp = textInput("", "", placeholder);
     field.appendChild(inp);
     toggle.input.addEventListener("change", function () { postSwitch(switchName, this.checked); });
@@ -1877,6 +1921,7 @@
       "switch-firmware__auto_update": function (val, d) {
         state.autoUpdate = d.value === true || val === "ON";
         if (els.setAutoUpdate) els.setAutoUpdate.checked = state.autoUpdate;
+        if (els.updateFreqWrap) els.updateFreqWrap.style.display = state.autoUpdate ? "" : "none";
       },
       "select-firmware__update_frequency": function (val, d) {
         state.updateFrequency = d.value || d.option || val || state.updateFrequency;
