@@ -1,0 +1,14 @@
+substitutions:
+  name: "espcontrol-7inch"
+  friendly_name: "Espcontrol 7inch"
+
+esphome:
+  name_add_mac_suffix: true
+
+packages:
+  espcontrol: !include ../devices/guition-esp32-p4-jc1060p470/packages.yaml
+
+wifi:
+  ap:
+
+captive_portal:

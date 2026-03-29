@@ -6,6 +6,10 @@
 # it at startup. Main page (lvgl.yaml) is included after setup screens.
 # =============================================================================
 
+substitutions:
+  device_slug: "guition-esp32-p4-jc1060p470"
+  firmware_manifest_slug: "espcontrol-7inch"
+
 packages:
   # ---------------------------------------------------------------------------
   # Device, assets, and LVGL base

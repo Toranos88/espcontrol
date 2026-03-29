@@ -26,5 +26,5 @@ wifi:
 packages:
   setup:
     url: https://github.com/jtenniswood/espcontrol/
-    file: devices/guition-esp32-p4-jc1060p470/package.yaml
+    file: devices/guition-esp32-p4-jc1060p470/packages.yaml
     refresh: 1sec

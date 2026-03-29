@@ -2,7 +2,7 @@
 # CONFIG: BUTTON TEMPLATE (parameterized by ${num})
 # =============================================================================
 # Per-button entity binding, label, and icon. Included once per button slot
-# from package.yaml with vars: { num: "N" }.
+# from packages.yaml with vars: { num: "N" }.
 # =============================================================================
 
 text:

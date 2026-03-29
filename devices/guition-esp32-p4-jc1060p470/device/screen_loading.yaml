@@ -1,7 +1,7 @@
 # =============================================================================
 # SCREEN: LOADING
 # =============================================================================
-# Boot screen. Must be the first page included in package.yaml so LVGL
+# Boot screen. Must be the first page included in packages.yaml so LVGL
 # shows it at startup. on_boot updates status text; after a grace period,
 # if WiFi is not connected, switches to wifi_setup_page.
 # =============================================================================

@@ -6,7 +6,7 @@ description:
 
 # Package layout
 
-Each device has its own manifest at `devices/<slug>/package.yaml`. ESPHome merges packages in declaration order; comments in the file document **why** the sequence matters.
+Each device has its own manifest at `devices/<slug>/packages.yaml`. ESPHome merges packages in declaration order; comments in the file document **why** the sequence matters.
 
 Shared resources (fonts, icons, config templates, generic addons) live under [`common/`](https://github.com/jtenniswood/espcontrol/tree/main/common) and are included via relative paths.
 

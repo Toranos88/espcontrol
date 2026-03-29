@@ -52,26 +52,46 @@ jobs:
       - name: Download firmware from latest release
         env:
           GH_TOKEN: ${{ github.token }}
+          DEVICE_SLUGS: "espcontrol-7inch"
         run: |
-          mkdir -p docs/.vitepress/dist/firmware
-          gh release download --pattern 'manifest.json' --dir docs/.vitepress/dist/firmware/ || true
-          gh release download --pattern '*.factory.bin' --dir docs/.vitepress/dist/firmware/ || true
-          gh release download --pattern '*.ota.bin' --dir docs/.vitepress/dist/firmware/ || true
+          for SLUG in $DEVICE_SLUGS; do
+            mkdir -p "docs/.vitepress/dist/firmware/${SLUG}"
+            gh release download \
+              --pattern "${SLUG}.manifest.json" \
+              --dir "docs/.vitepress/dist/firmware/${SLUG}/" || true
+            if [ -f "docs/.vitepress/dist/firmware/${SLUG}/${SLUG}.manifest.json" ]; then
+              mv "docs/.vitepress/dist/firmware/${SLUG}/${SLUG}.manifest.json" \
+                 "docs/.vitepress/dist/firmware/${SLUG}/manifest.json"
+            fi
+            gh release download \
+              --pattern "${SLUG}.factory.bin" \
+              --dir "docs/.vitepress/dist/firmware/${SLUG}/" || true
+            gh release download \
+              --pattern "${SLUG}.ota.bin" \
+              --dir "docs/.vitepress/dist/firmware/${SLUG}/" || true
+          done
 
       - name: Download firmware from latest pre-release
         env:
           GH_TOKEN: ${{ github.token }}
+          DEVICE_SLUGS: "espcontrol-7inch"
         run: |
           BETA_TAG=$(gh release list --limit 20 --json tagName,isPrerelease \
             -q '[.[] | select(.isPrerelease)] | .[0].tagName // empty')
           if [ -n "$BETA_TAG" ]; then
-            mkdir -p docs/.vitepress/dist/firmware/beta
-            gh release download "$BETA_TAG" \
-              --pattern 'manifest.json' \
-              --dir docs/.vitepress/dist/firmware/beta/ || true
-            gh release download "$BETA_TAG" \
-              --pattern '*.ota.bin' \
-              --dir docs/.vitepress/dist/firmware/beta/ || true
+            for SLUG in $DEVICE_SLUGS; do
+              mkdir -p "docs/.vitepress/dist/firmware/${SLUG}/beta"
+              gh release download "$BETA_TAG" \
+                --pattern "${SLUG}.manifest.json" \
+                --dir "docs/.vitepress/dist/firmware/${SLUG}/beta/" || true
+              if [ -f "docs/.vitepress/dist/firmware/${SLUG}/beta/${SLUG}.manifest.json" ]; then
+                mv "docs/.vitepress/dist/firmware/${SLUG}/beta/${SLUG}.manifest.json" \
+                   "docs/.vitepress/dist/firmware/${SLUG}/beta/manifest.json"
+              fi
+              gh release download "$BETA_TAG" \
+                --pattern "${SLUG}.ota.bin" \
+                --dir "docs/.vitepress/dist/firmware/${SLUG}/beta/" || true
+            done
           fi
 
       - name: Upload pages artifact

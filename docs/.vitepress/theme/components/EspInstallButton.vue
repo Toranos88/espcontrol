@@ -17,7 +17,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const manifestUrl = './firmware/manifest.json'
+const manifestUrl = './firmware/espcontrol-7inch/manifest.json'
 const supported = ref(false)
 const loadError = ref(null)
 

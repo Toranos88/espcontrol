@@ -13,14 +13,20 @@ env:
 
 jobs:
   build-firmware:
-    name: Build Firmware
+    name: Build ${{ matrix.slug }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - device: guition-esp32-p4-jc1060p470
+            slug: espcontrol-7inch
+            chip: ESP32-P4
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.repository.default_branch }}
 
-      - name: Compile P4 firmware
+      - name: Compile firmware
         env:
           VERSION: ${{ github.event.release.tag_name || github.ref_name }}
         run: >-
@@ -28,12 +34,12 @@ jobs:
           -v "${PWD}:/config"
           ghcr.io/esphome/esphome:latest
           -s firmware_version "${VERSION}"
-          compile /config/devices/guition-esp32-p4-jc1060p470/factory.yaml
+          compile /config/builds/${{ matrix.slug }}.factory.yaml
 
       - name: Collect firmware files and generate manifest
         id: firmware
         run: |
-          BUILD_DIR="devices/guition-esp32-p4-jc1060p470/.esphome/build/espcontrol-7inch/.pioenvs/espcontrol-7inch"
+          BUILD_DIR="builds/.esphome/build/${{ matrix.slug }}/.pioenvs/${{ matrix.slug }}"
           mkdir -p output
 
           if [ ! -f "${BUILD_DIR}/firmware.factory.bin" ]; then
@@ -41,25 +47,25 @@ jobs:
             exit 1
           fi
 
-          sudo cp "${BUILD_DIR}/firmware.factory.bin" output/espcontrol.factory.bin
-          sudo cp "${BUILD_DIR}/firmware.bin" output/espcontrol.ota.bin
+          sudo cp "${BUILD_DIR}/firmware.factory.bin" output/${{ matrix.slug }}.factory.bin
+          sudo cp "${BUILD_DIR}/firmware.bin" output/${{ matrix.slug }}.ota.bin
 
-          OTA_MD5=$(md5sum output/espcontrol.ota.bin | cut -d ' ' -f 1)
+          OTA_MD5=$(md5sum output/${{ matrix.slug }}.ota.bin | cut -d ' ' -f 1)
           VERSION="${{ github.event.release.tag_name || github.ref_name }}"
 
-          cat > output/manifest.json << EOF
+          cat > output/${{ matrix.slug }}.manifest.json << EOF
           {
             "name": "Espcontrol",
             "version": "${VERSION}",
             "home_assistant_domain": "esphome",
             "builds": [
               {
-                "chipFamily": "ESP32-P4",
+                "chipFamily": "${{ matrix.chip }}",
                 "parts": [
-                  { "path": "espcontrol.factory.bin", "offset": 0 }
+                  { "path": "${{ matrix.slug }}.factory.bin", "offset": 0 }
                 ],
                 "ota": {
-                  "path": "espcontrol.ota.bin",
+                  "path": "${{ matrix.slug }}.ota.bin",
                   "md5": "${OTA_MD5}",
                   "release_url": "https://github.com/jtenniswood/espcontrol/releases/tag/${VERSION}"
                 }
@@ -71,7 +77,7 @@ jobs:
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v7
         with:
-          name: firmware
+          name: firmware-${{ matrix.slug }}
           path: output/
 
       - name: Upload firmware to release
@@ -80,7 +86,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: >-
           gh release upload "${{ github.event.release.tag_name }}"
-          output/espcontrol.factory.bin
-          output/espcontrol.ota.bin
-          output/manifest.json
+          output/${{ matrix.slug }}.factory.bin
+          output/${{ matrix.slug }}.ota.bin
+          output/${{ matrix.slug }}.manifest.json
           --clobber

@@ -2,7 +2,7 @@
 # CONFIG: SHARED BUTTON SETTINGS
 # =============================================================================
 # Shared on/off colors and button display order. Per-button entity, label,
-# and icon are defined via button_template.yaml includes in package.yaml.
+# and icon are defined via button_template.yaml includes in packages.yaml.
 # =============================================================================
 
 text:
