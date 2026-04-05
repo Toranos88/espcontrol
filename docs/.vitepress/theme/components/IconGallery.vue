@@ -6,18 +6,21 @@
       class="icon-search"
       placeholder="Search icons…"
     />
-    <p class="icon-count">{{ filtered.length }} icon{{ filtered.length === 1 ? '' : 's' }}</p>
-    <div class="icon-grid">
-      <button
-        v-for="icon in filtered"
-        :key="icon.name"
-        class="icon-card"
-        :class="{ copied: copiedName === icon.name }"
-        @click="copy(icon.name)"
-      >
-        <span class="icon-preview mdi" :class="'mdi-' + icon.mdi" />
-        <span class="icon-name">{{ copiedName === icon.name ? 'Copied!' : icon.name }}</span>
-      </button>
+    <p class="icon-count">{{ totalFiltered }} icon{{ totalFiltered === 1 ? '' : 's' }}</p>
+    <div v-for="group in filteredGroups" :key="group.name" class="icon-group">
+      <h3 class="icon-group-title">{{ group.name }}</h3>
+      <div class="icon-grid">
+        <button
+          v-for="icon in group.icons"
+          :key="icon.name"
+          class="icon-card"
+          :class="{ copied: copiedName === icon.name }"
+          @click="copy(icon.name)"
+        >
+          <span class="icon-preview mdi" :class="'mdi-' + icon.mdi" />
+          <span class="icon-name">{{ copiedName === icon.name ? 'Copied!' : icon.name }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -26,16 +29,259 @@
 import { ref, computed, onMounted } from 'vue'
 import iconsData from '../../../../common/assets/icons.json'
 
+const GROUP_ORDER = [
+  'Lighting',
+  'Climate & Air',
+  'Covers & Shading',
+  'Security & Access',
+  'Power & Energy',
+  'Weather',
+  'Appliances',
+  'Media & Entertainment',
+  'Water & Outdoors',
+  'Network & Tech',
+  'Rooms & Furniture',
+  'Vehicles',
+  'General',
+]
+
+const ICON_GROUPS = {
+  'Ceiling Light': 'Lighting',
+  'Chandelier': 'Lighting',
+  'Desk Lamp': 'Lighting',
+  'Floor Lamp': 'Lighting',
+  'Lamp': 'Lighting',
+  'LED Strip': 'Lighting',
+  'LED Strip Variant': 'Lighting',
+  'LED Strip Variant Off': 'Lighting',
+  'Light Switch': 'Lighting',
+  'Lightbulb': 'Lighting',
+  'Lightbulb Group': 'Lighting',
+  'Lightbulb Group Outline': 'Lighting',
+  'Lightbulb Night': 'Lighting',
+  'Lightbulb Night Outline': 'Lighting',
+  'Lightbulb Off': 'Lighting',
+  'Lightbulb Outline': 'Lighting',
+  'Outdoor Lamp': 'Lighting',
+  'Spotlight': 'Lighting',
+  'String Lights': 'Lighting',
+
+  'Air Conditioner': 'Climate & Air',
+  'Air Filter': 'Climate & Air',
+  'Air Purifier': 'Climate & Air',
+  'Ceiling Fan': 'Climate & Air',
+  'Fan': 'Climate & Air',
+  'Fire': 'Climate & Air',
+  'Fireplace': 'Climate & Air',
+  'Heater': 'Climate & Air',
+  'Humidifier': 'Climate & Air',
+  'Snowflake': 'Climate & Air',
+  'Snowflake Alert': 'Climate & Air',
+  'Snowflake Thermometer': 'Climate & Air',
+  'Thermometer': 'Climate & Air',
+  'Thermometer Alert': 'Climate & Air',
+  'Thermometer High': 'Climate & Air',
+  'Thermometer Low': 'Climate & Air',
+  'Thermostat': 'Climate & Air',
+
+  'Blinds': 'Covers & Shading',
+  'Blinds Horizontal': 'Covers & Shading',
+  'Blinds Horizontal Closed': 'Covers & Shading',
+  'Blinds Open': 'Covers & Shading',
+  'Curtains': 'Covers & Shading',
+  'Curtains Closed': 'Covers & Shading',
+  'Roller Shade': 'Covers & Shading',
+  'Roller Shade Closed': 'Covers & Shading',
+  'Window': 'Covers & Shading',
+
+  'Alarm': 'Security & Access',
+  'Alarm Light': 'Security & Access',
+  'Bell': 'Security & Access',
+  'Camera': 'Security & Access',
+  'CCTV': 'Security & Access',
+  'Door': 'Security & Access',
+  'Door Open': 'Security & Access',
+  'Doorbell': 'Security & Access',
+  'Garage': 'Security & Access',
+  'Garage Open': 'Security & Access',
+  'Gate': 'Security & Access',
+  'Gate Open': 'Security & Access',
+  'Key': 'Security & Access',
+  'Lock': 'Security & Access',
+  'Motion Sensor': 'Security & Access',
+  'Security': 'Security & Access',
+  'Smoke Detector': 'Security & Access',
+
+  'Battery': 'Power & Energy',
+  'Battery 10%': 'Power & Energy',
+  'Battery 20%': 'Power & Energy',
+  'Battery 30%': 'Power & Energy',
+  'Battery 40%': 'Power & Energy',
+  'Battery 50%': 'Power & Energy',
+  'Battery 60%': 'Power & Energy',
+  'Battery 70%': 'Power & Energy',
+  'Battery 80%': 'Power & Energy',
+  'Battery 90%': 'Power & Energy',
+  'Battery Alert': 'Power & Energy',
+  'Battery Charging': 'Power & Energy',
+  'Battery Charging 100': 'Power & Energy',
+  'Battery Charging 70': 'Power & Energy',
+  'Battery High': 'Power & Energy',
+  'Battery Low': 'Power & Energy',
+  'Battery Medium': 'Power & Energy',
+  'Battery Off': 'Power & Energy',
+  'Battery Outline': 'Power & Energy',
+  'Battery Unknown': 'Power & Energy',
+  'Current AC': 'Power & Energy',
+  'Current DC': 'Power & Energy',
+  'Flash': 'Power & Energy',
+  'Gauge': 'Power & Energy',
+  'Gauge Empty': 'Power & Energy',
+  'Gauge Full': 'Power & Energy',
+  'Gauge Low': 'Power & Energy',
+  'Grid Export': 'Power & Energy',
+  'Grid Import': 'Power & Energy',
+  'Grid Off': 'Power & Energy',
+  'Lightning Bolt': 'Power & Energy',
+  'Meter Electric': 'Power & Energy',
+  'Meter Gas': 'Power & Energy',
+  'Power': 'Power & Energy',
+  'Power Plug': 'Power & Energy',
+  'Solar Panel': 'Power & Energy',
+  'Solar Panel Large': 'Power & Energy',
+  'Solar Power': 'Power & Energy',
+  'Solar Power Variant': 'Power & Energy',
+  'Transmission Tower': 'Power & Energy',
+  'Wall Outlet': 'Power & Energy',
+  'Wind Power': 'Power & Energy',
+  'Wind Turbine': 'Power & Energy',
+  'Wind Turbine Alert': 'Power & Energy',
+  'Wind Turbine Check': 'Power & Energy',
+
+  'Sun': 'Weather',
+  'Weather Cloudy': 'Weather',
+  'Weather Cloudy Alert': 'Weather',
+  'Weather Dust': 'Weather',
+  'Weather Fog': 'Weather',
+  'Weather Hail': 'Weather',
+  'Weather Hazy': 'Weather',
+  'Weather Hurricane': 'Weather',
+  'Weather Lightning': 'Weather',
+  'Weather Lightning Rainy': 'Weather',
+  'Weather Night': 'Weather',
+  'Weather Night Cloudy': 'Weather',
+  'Weather Partly Cloudy': 'Weather',
+  'Weather Partly Lightning': 'Weather',
+  'Weather Partly Rainy': 'Weather',
+  'Weather Partly Snowy': 'Weather',
+  'Weather Partly Snowy Rainy': 'Weather',
+  'Weather Pouring': 'Weather',
+  'Weather Rainy': 'Weather',
+  'Weather Snowy': 'Weather',
+  'Weather Snowy Heavy': 'Weather',
+  'Weather Snowy Rainy': 'Weather',
+  'Weather Sunny': 'Weather',
+  'Weather Sunny Alert': 'Weather',
+  'Weather Sunny Off': 'Weather',
+  'Weather Sunset': 'Weather',
+  'Weather Sunset Down': 'Weather',
+  'Weather Sunset Up': 'Weather',
+  'Weather Tornado': 'Weather',
+  'Weather Windy': 'Weather',
+  'Weather Windy Variant': 'Weather',
+
+  'Coffee Maker': 'Appliances',
+  'Dishwasher': 'Appliances',
+  'Dryer': 'Appliances',
+  'Fridge': 'Appliances',
+  'Iron': 'Appliances',
+  'Kettle': 'Appliances',
+  'Microwave': 'Appliances',
+  'Oven': 'Appliances',
+  'Washer': 'Appliances',
+
+  'Cast': 'Media & Entertainment',
+  'Gamepad': 'Media & Entertainment',
+  'Headphones': 'Media & Entertainment',
+  'Message Video': 'Media & Entertainment',
+  'Monitor': 'Media & Entertainment',
+  'Movie Roll': 'Media & Entertainment',
+  'Music': 'Media & Entertainment',
+  'Projector': 'Media & Entertainment',
+  'Speaker': 'Media & Entertainment',
+  'Television': 'Media & Entertainment',
+
+  'Fountain': 'Water & Outdoors',
+  'Hot Tub': 'Water & Outdoors',
+  'Humidity Alert': 'Water & Outdoors',
+  'Lawnmower': 'Water & Outdoors',
+  'Leaf': 'Water & Outdoors',
+  'Pool': 'Water & Outdoors',
+  'Shower': 'Water & Outdoors',
+  'Sprinkler': 'Water & Outdoors',
+  'Water': 'Water & Outdoors',
+  'Water Heater': 'Water & Outdoors',
+  'Water Percent': 'Water & Outdoors',
+
+  'Application': 'Network & Tech',
+  'Bluetooth': 'Network & Tech',
+  'LAN': 'Network & Tech',
+  'Printer': 'Network & Tech',
+  'Printer 3D': 'Network & Tech',
+  'Robot Vacuum': 'Network & Tech',
+  'Router': 'Network & Tech',
+  'Router Network': 'Network & Tech',
+
+  'Bed': 'Rooms & Furniture',
+  'Sofa': 'Rooms & Furniture',
+  'Table': 'Rooms & Furniture',
+  'Toilet': 'Rooms & Furniture',
+
+  'Car Electric': 'Vehicles',
+  'EV Charger': 'Vehicles',
+
+  'Account': 'General',
+  'Broom': 'General',
+  'Clock': 'General',
+  'Dog': 'General',
+  'Home': 'General',
+  'Mailbox': 'General',
+  'Package': 'General',
+  'Package Closed': 'General',
+  'Timer': 'General',
+  'Trash Can': 'General',
+}
+
 const icons = iconsData.icons
 const search = ref('')
 const copiedName = ref(null)
 let copyTimer = null
 
-const filtered = computed(() => {
+function groupOf(icon) {
+  return ICON_GROUPS[icon.name] || 'General'
+}
+
+const filteredGroups = computed(() => {
   const q = search.value.toLowerCase()
-  if (!q) return icons
-  return icons.filter(i => i.name.toLowerCase().includes(q))
+  const matched = q
+    ? icons.filter(i => i.name.toLowerCase().includes(q))
+    : icons
+
+  const buckets = {}
+  for (const icon of matched) {
+    const g = groupOf(icon)
+    if (!buckets[g]) buckets[g] = []
+    buckets[g].push(icon)
+  }
+
+  return GROUP_ORDER
+    .filter(g => buckets[g])
+    .map(g => ({ name: g, icons: buckets[g] }))
 })
+
+const totalFiltered = computed(() =>
+  filteredGroups.value.reduce((sum, g) => sum + g.icons.length, 0)
+)
 
 function copy(name) {
   navigator.clipboard.writeText(name)
@@ -78,7 +324,20 @@ onMounted(() => {
 .icon-count {
   font-size: 13px;
   color: var(--vp-c-text-3);
-  margin: 8px 0 12px;
+  margin: 8px 0 4px;
+}
+
+.icon-group {
+  margin-top: 1.25rem;
+}
+
+.icon-group-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--vp-c-border);
 }
 
 .icon-grid {
