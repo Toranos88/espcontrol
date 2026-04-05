@@ -177,6 +177,57 @@
     // --- GENERATED:DOMAIN_ICONS END ---
   };
 
+  var ICON_ALIASES = {
+    "Battery 10%": "Battery",
+    "Battery 20%": "Battery",
+    "Battery 30%": "Battery",
+    "Battery 40%": "Battery",
+    "Battery 50%": "Battery",
+    "Battery 60%": "Battery",
+    "Battery 70%": "Battery",
+    "Battery 80%": "Battery",
+    "Battery 90%": "Battery",
+    "Battery Charging 100": "Battery Charging",
+    "Battery Charging 70": "Battery Charging",
+    "Battery High": "Battery",
+    "Battery Low": "Battery",
+    "Battery Medium": "Battery",
+    "Battery Off": "Battery",
+    "Battery Unknown": "Battery",
+    "Gauge Empty": "Gauge",
+    "Gauge Full": "Gauge",
+    "Gauge Low": "Gauge",
+    "Grid Export": "Transmission Tower",
+    "Grid Import": "Transmission Tower",
+    "Grid Off": "Transmission Tower",
+    "LED Strip Variant Off": "LED Strip Variant",
+    "Lightbulb Group Outline": "Lightbulb Group",
+    "Lightbulb Night": "Lightbulb",
+    "Lightbulb Night Outline": "Lightbulb Outline",
+    "Package Closed": "Package",
+    "Snowflake Alert": "Snowflake",
+    "Snowflake Thermometer": "Snowflake",
+    "Weather Cloudy Alert": "Weather Cloudy",
+    "Weather Dust": "Weather Windy",
+    "Weather Hail": "Weather Snowy",
+    "Weather Hazy": "Weather Fog",
+    "Weather Hurricane": "Weather Windy",
+    "Weather Night Cloudy": "Weather Night",
+    "Weather Partly Lightning": "Weather Lightning",
+    "Weather Partly Snowy": "Weather Snowy",
+    "Weather Partly Snowy Rainy": "Weather Rainy",
+    "Weather Snowy Heavy": "Weather Snowy",
+    "Weather Snowy Rainy": "Weather Rainy",
+    "Weather Sunny Alert": "Weather Sunny",
+    "Weather Sunny Off": "Weather Sunny",
+    "Wind Turbine Alert": "Wind Turbine",
+    "Wind Turbine Check": "Wind Turbine",
+  };
+
+  function migrateIcon(name) {
+    return ICON_ALIASES[name] || name;
+  }
+
   var ICON_OPTIONS = Object.keys(ICON_MAP).sort();
 
   var CSS =
@@ -493,7 +544,7 @@
 
   function resolveIcon(slot) {
     var b = state.buttons[slot - 1];
-    var sel = b.icon || "Auto";
+    var sel = migrateIcon(b.icon || "Auto");
     if (sel === "Auto" && b.entity) {
       var domain = b.entity.split(".")[0];
       return DOMAIN_ICONS[domain] || "cog";
@@ -1277,7 +1328,7 @@
     iconPicker.className = "sp-icon-picker";
     iconPicker.id = "sp-inp-icon-picker";
     iconPicker.innerHTML =
-      '<span class="sp-icon-picker-preview mdi mdi-' + (ICON_MAP[b.icon] || "cog") + '"></span>' +
+      '<span class="sp-icon-picker-preview mdi mdi-' + (ICON_MAP[migrateIcon(b.icon)] || "cog") + '"></span>' +
       '<input class="sp-icon-picker-input" id="sp-inp-icon" type="text" ' +
       'placeholder="Search icons\u2026" value="' + escAttr(b.icon) + '" autocomplete="off">' +
       '<div class="sp-icon-dropdown"></div>';
@@ -1419,7 +1470,7 @@
     var highlighted = -1;
 
     function iconClass(name) {
-      return ICON_MAP[name] || "cog";
+      return ICON_MAP[migrateIcon(name)] || "cog";
     }
 
     function buildOptions(filter) {
@@ -1887,14 +1938,16 @@
           postText("Button " + n + " Label", b.label || "");
           postText("Button " + n + " Sensor", b.sensor || "");
           postText("Button " + n + " Sensor Unit", b.unit || "");
-          postText("Button " + n + " Icon", b.icon || "Auto");
-          postText("Button " + n + " Icon On", b.icon_on || "Auto");
+          var mIcon = migrateIcon(b.icon || "Auto");
+          var mIconOn = migrateIcon(b.icon_on || "Auto");
+          postText("Button " + n + " Icon", mIcon);
+          postText("Button " + n + " Icon On", mIconOn);
 
           state.buttons[i] = {
             entity: b.entity || "",
             label: b.label || "",
-            icon: b.icon || "Auto",
-            icon_on: b.icon_on || "Auto",
+            icon: mIcon,
+            icon_on: mIconOn,
             sensor: b.sensor || "",
             unit: b.unit || "",
           };
@@ -2104,12 +2157,12 @@
         fn: function (m, val) {
           var slot = parseInt(m[1], 10);
           if (slot >= 1 && slot <= NUM_SLOTS) {
-            state.buttons[slot - 1].icon = val;
+            state.buttons[slot - 1].icon = migrateIcon(val);
             renderPreview();
             if (state.selectedSlots.length === 1 && state.selectedSlots[0] === slot && isSettingsFocused()) {
-              syncInput(document.getElementById("sp-inp-icon"), val);
+              syncInput(document.getElementById("sp-inp-icon"), migrateIcon(val));
               var prev = document.querySelector(".sp-icon-picker-preview");
-              if (prev) prev.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[val] || "cog");
+              if (prev) prev.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[migrateIcon(val)] || "cog");
             } else {
               renderButtonSettings();
             }
@@ -2121,14 +2174,14 @@
         fn: function (m, val) {
           var slot = parseInt(m[1], 10);
           if (slot >= 1 && slot <= NUM_SLOTS) {
-            state.buttons[slot - 1].icon_on = val;
+            state.buttons[slot - 1].icon_on = migrateIcon(val);
             renderPreview();
             if (state.selectedSlots.length === 1 && state.selectedSlots[0] === slot && isSettingsFocused()) {
               syncInput(document.getElementById("sp-inp-icon-on"), val);
               var prev = document.getElementById("sp-inp-icon-on-picker");
               if (prev) {
                 var p = prev.querySelector(".sp-icon-picker-preview");
-                if (p) p.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[val] || "cog");
+                if (p) p.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[migrateIcon(val)] || "cog");
               }
             } else {
               renderButtonSettings();

@@ -252,12 +252,84 @@ esphome:
             };
             static constexpr size_t NUM_ICONS = sizeof(icon_entries) / sizeof(icon_entries[0]);
 
+            struct IconAlias { const char* old_name; const char* new_name; };
+            static const IconAlias icon_aliases[] = {
+              {"Battery 10%",                "Battery"},
+              {"Battery 20%",                "Battery"},
+              {"Battery 30%",                "Battery"},
+              {"Battery 40%",                "Battery"},
+              {"Battery 50%",                "Battery"},
+              {"Battery 60%",                "Battery"},
+              {"Battery 70%",                "Battery"},
+              {"Battery 80%",                "Battery"},
+              {"Battery 90%",                "Battery"},
+              {"Battery Charging 100",       "Battery Charging"},
+              {"Battery Charging 70",        "Battery Charging"},
+              {"Battery High",               "Battery"},
+              {"Battery Low",                "Battery"},
+              {"Battery Medium",             "Battery"},
+              {"Battery Off",                "Battery"},
+              {"Battery Unknown",            "Battery"},
+              {"Gauge Empty",                "Gauge"},
+              {"Gauge Full",                 "Gauge"},
+              {"Gauge Low",                  "Gauge"},
+              {"Grid Export",                "Transmission Tower"},
+              {"Grid Import",                "Transmission Tower"},
+              {"Grid Off",                   "Transmission Tower"},
+              {"LED Strip Variant Off",      "LED Strip Variant"},
+              {"Lightbulb Group Outline",    "Lightbulb Group"},
+              {"Lightbulb Night",            "Lightbulb"},
+              {"Lightbulb Night Outline",    "Lightbulb Outline"},
+              {"Package Closed",             "Package"},
+              {"Snowflake Alert",            "Snowflake"},
+              {"Snowflake Thermometer",      "Snowflake"},
+              {"Weather Cloudy Alert",       "Weather Cloudy"},
+              {"Weather Dust",               "Weather Windy"},
+              {"Weather Hail",               "Weather Snowy"},
+              {"Weather Hazy",               "Weather Fog"},
+              {"Weather Hurricane",          "Weather Windy"},
+              {"Weather Night Cloudy",       "Weather Night"},
+              {"Weather Partly Lightning",   "Weather Lightning"},
+              {"Weather Partly Snowy",       "Weather Snowy"},
+              {"Weather Partly Snowy Rainy", "Weather Rainy"},
+              {"Weather Snowy Heavy",        "Weather Snowy"},
+              {"Weather Snowy Rainy",        "Weather Rainy"},
+              {"Weather Sunny Alert",        "Weather Sunny"},
+              {"Weather Sunny Off",          "Weather Sunny"},
+              {"Wind Turbine Alert",         "Wind Turbine"},
+              {"Wind Turbine Check",         "Wind Turbine"},
+            };
+            static constexpr size_t NUM_ALIASES = sizeof(icon_aliases) / sizeof(icon_aliases[0]);
+
+            auto resolve_alias = [](const std::string &name) -> const char* {
+              for (size_t i = 0; i < NUM_ALIASES; i++) {
+                if (name == icon_aliases[i].old_name) return icon_aliases[i].new_name;
+              }
+              return nullptr;
+            };
+
             auto find_icon = [](const char* name) -> const char* {
               for (size_t i = 0; i < NUM_ICONS; i++) {
                 if (strcmp(icon_entries[i].name, name) == 0) return icon_entries[i].glyph;
               }
               return "\U000F0493";  // cog fallback
             };
+
+            auto migrate_icon = [&](esphome::text::Text *field) {
+              std::string val = field->state;
+              if (val.empty() || val == "Auto") return;
+              const char* replacement = resolve_alias(val);
+              if (replacement) {
+                auto call = field->make_call();
+                call.set_value(std::string(replacement));
+                call.perform();
+              }
+            };
+
+            for (int i = 0; i < NUM_SLOTS; i++) {
+              migrate_icon(slots[i].icon);
+              migrate_icon(slots[i].icon_on);
+            }
 
             static bool has_sensor[NUM_SLOTS] = {};
             static bool has_icon_on[NUM_SLOTS] = {};
