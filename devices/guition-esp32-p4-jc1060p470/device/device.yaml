@@ -47,6 +47,7 @@ esphome:
   platformio_options:
     build_flags:
       - "-Wno-deprecated-declarations"
+    build_src_flags:
       - "-Wno-literal-suffix"
 
 # ---------------------------------------------------------------------------
