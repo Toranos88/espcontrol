@@ -66,8 +66,23 @@ esphome:
               { id(button_28_entity), id(button_28_label), id(button_28_icon), id(button_28_icon_on), id(button_28_sensor), id(button_28_sensor_unit), id(button_28), id(button_28_icon_label), id(button_28_text_label), id(button_28_sensor_container), id(button_28_sensor_label), id(button_28_unit_label) },
               { id(button_29_entity), id(button_29_label), id(button_29_icon), id(button_29_icon_on), id(button_29_sensor), id(button_29_sensor_unit), id(button_29), id(button_29_icon_label), id(button_29_text_label), id(button_29_sensor_container), id(button_29_sensor_label), id(button_29_unit_label) },
               { id(button_30_entity), id(button_30_label), id(button_30_icon), id(button_30_icon_on), id(button_30_sensor), id(button_30_sensor_unit), id(button_30), id(button_30_icon_label), id(button_30_text_label), id(button_30_sensor_container), id(button_30_sensor_label), id(button_30_unit_label) },
+              { id(button_31_entity), id(button_31_label), id(button_31_icon), id(button_31_icon_on), id(button_31_sensor), id(button_31_sensor_unit), id(button_31), id(button_31_icon_label), id(button_31_text_label), id(button_31_sensor_container), id(button_31_sensor_label), id(button_31_unit_label) },
+              { id(button_32_entity), id(button_32_label), id(button_32_icon), id(button_32_icon_on), id(button_32_sensor), id(button_32_sensor_unit), id(button_32), id(button_32_icon_label), id(button_32_text_label), id(button_32_sensor_container), id(button_32_sensor_label), id(button_32_unit_label) },
+              { id(button_33_entity), id(button_33_label), id(button_33_icon), id(button_33_icon_on), id(button_33_sensor), id(button_33_sensor_unit), id(button_33), id(button_33_icon_label), id(button_33_text_label), id(button_33_sensor_container), id(button_33_sensor_label), id(button_33_unit_label) },
+              { id(button_34_entity), id(button_34_label), id(button_34_icon), id(button_34_icon_on), id(button_34_sensor), id(button_34_sensor_unit), id(button_34), id(button_34_icon_label), id(button_34_text_label), id(button_34_sensor_container), id(button_34_sensor_label), id(button_34_unit_label) },
+              { id(button_35_entity), id(button_35_label), id(button_35_icon), id(button_35_icon_on), id(button_35_sensor), id(button_35_sensor_unit), id(button_35), id(button_35_icon_label), id(button_35_text_label), id(button_35_sensor_container), id(button_35_sensor_label), id(button_35_unit_label) },
+              { id(button_36_entity), id(button_36_label), id(button_36_icon), id(button_36_icon_on), id(button_36_sensor), id(button_36_sensor_unit), id(button_36), id(button_36_icon_label), id(button_36_text_label), id(button_36_sensor_container), id(button_36_sensor_label), id(button_36_unit_label) },
+              { id(button_37_entity), id(button_37_label), id(button_37_icon), id(button_37_icon_on), id(button_37_sensor), id(button_37_sensor_unit), id(button_37), id(button_37_icon_label), id(button_37_text_label), id(button_37_sensor_container), id(button_37_sensor_label), id(button_37_unit_label) },
+              { id(button_38_entity), id(button_38_label), id(button_38_icon), id(button_38_icon_on), id(button_38_sensor), id(button_38_sensor_unit), id(button_38), id(button_38_icon_label), id(button_38_text_label), id(button_38_sensor_container), id(button_38_sensor_label), id(button_38_unit_label) },
+              { id(button_39_entity), id(button_39_label), id(button_39_icon), id(button_39_icon_on), id(button_39_sensor), id(button_39_sensor_unit), id(button_39), id(button_39_icon_label), id(button_39_text_label), id(button_39_sensor_container), id(button_39_sensor_label), id(button_39_unit_label) },
+              { id(button_40_entity), id(button_40_label), id(button_40_icon), id(button_40_icon_on), id(button_40_sensor), id(button_40_sensor_unit), id(button_40), id(button_40_icon_label), id(button_40_text_label), id(button_40_sensor_container), id(button_40_sensor_label), id(button_40_unit_label) },
+              { id(button_41_entity), id(button_41_label), id(button_41_icon), id(button_41_icon_on), id(button_41_sensor), id(button_41_sensor_unit), id(button_41), id(button_41_icon_label), id(button_41_text_label), id(button_41_sensor_container), id(button_41_sensor_label), id(button_41_unit_label) },
+              { id(button_42_entity), id(button_42_label), id(button_42_icon), id(button_42_icon_on), id(button_42_sensor), id(button_42_sensor_unit), id(button_42), id(button_42_icon_label), id(button_42_text_label), id(button_42_sensor_container), id(button_42_sensor_label), id(button_42_unit_label) },
+              { id(button_43_entity), id(button_43_label), id(button_43_icon), id(button_43_icon_on), id(button_43_sensor), id(button_43_sensor_unit), id(button_43), id(button_43_icon_label), id(button_43_text_label), id(button_43_sensor_container), id(button_43_sensor_label), id(button_43_unit_label) },
+              { id(button_44_entity), id(button_44_label), id(button_44_icon), id(button_44_icon_on), id(button_44_sensor), id(button_44_sensor_unit), id(button_44), id(button_44_icon_label), id(button_44_text_label), id(button_44_sensor_container), id(button_44_sensor_label), id(button_44_unit_label) },
+              { id(button_45_entity), id(button_45_label), id(button_45_icon), id(button_45_icon_on), id(button_45_sensor), id(button_45_sensor_unit), id(button_45), id(button_45_icon_label), id(button_45_text_label), id(button_45_sensor_container), id(button_45_sensor_label), id(button_45_unit_label) },
             };
-            constexpr int NUM_SLOTS = 30;
+            constexpr int NUM_SLOTS = 45;
 
             // --- Parse button_order (comma-separated 1-indexed slot numbers) ---
             std::string order_str = id(button_order).state;
@@ -308,11 +323,9 @@ esphome:
             static const char* icon_off_cp[NUM_SLOTS] = {};
             static const char* icon_on_cp[NUM_SLOTS] = {};
 
-            int pos = 0;
             for (int idx : order) {
               auto &s = slots[idx - 1];
               lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_HIDDEN);
-              lv_obj_move_to_index(s.btn, pos++);
 
               // Apply colors
               if (has_on) {

@@ -53,6 +53,7 @@ esphome:
         - lambda: |-
             lv_obj_add_flag(id(temperatures), LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(id(display_time), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(page_dots), LV_OBJ_FLAG_HIDDEN);
         - delay: 100ms
         - light.turn_on:
             id: display_backlight

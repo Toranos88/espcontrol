@@ -146,7 +146,30 @@ touchscreen:
     id: my_touchscreen
     display: my_display
     on_touch:
+      - lambda: |-
+          id(touch_start_x) = touch.x;
+          id(touch_start_y) = touch.y;
       - script.execute: screensaver_wake
+    on_release:
+      - lambda: |-
+          int dx = (int)touch.x - id(touch_start_x);
+          int dy = (int)touch.y - id(touch_start_y);
+          lv_obj_t* cur = lv_scr_act();
+          lv_obj_t* pages[] = {id(page_1), id(page_2), id(page_3), id(page_4), id(page_5)};
+          bool on_page = false;
+          for (int i = 0; i < 5; i++) { if (cur == pages[i]) { on_page = true; break; } }
+          if (!on_page) return;
+          if (abs(dx) > 60 && abs(dx) > abs(dy) * 2) {
+            if (dx < 0 && id(current_page) < 4) {
+              id(current_page)++;
+              lv_scr_load_anim(pages[id(current_page)], LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, false);
+              id(update_page_dots).execute();
+            } else if (dx > 0 && id(current_page) > 0) {
+              id(current_page)--;
+              lv_scr_load_anim(pages[id(current_page)], LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, false);
+              id(update_page_dots).execute();
+            }
+          }
 
 # ---------------------------------------------------------------------------
 # Display (4" 480x480 ST7701S SPI panel)
@@ -184,3 +207,35 @@ display:
       red: [11, 12, 13, 14, 0]
       green: [8, 20, 3, 46, 9, 10]
       blue: [4, 5, 6, 7, 15]
+
+# ---------------------------------------------------------------------------
+# Page navigation (swipe detection state + dot indicator update)
+# ---------------------------------------------------------------------------
+globals:
+  - id: touch_start_x
+    type: int
+    initial_value: '0'
+  - id: touch_start_y
+    type: int
+    initial_value: '0'
+  - id: current_page
+    type: int
+    initial_value: '0'
+
+script:
+  - id: update_page_dots
+    then:
+      - lambda: |-
+          lv_obj_t* dots[] = {id(dot_1), id(dot_2), id(dot_3), id(dot_4), id(dot_5)};
+          int page = id(current_page);
+          for (int i = 0; i < 5; i++) {
+            if (i == page) {
+              lv_obj_set_style_bg_opa(dots[i], LV_OPA_COVER, 0);
+              lv_obj_set_style_bg_color(dots[i], lv_color_hex(0xFFFFFF), 0);
+              lv_obj_set_style_border_width(dots[i], 0, 0);
+            } else {
+              lv_obj_set_style_bg_opa(dots[i], LV_OPA_TRANSP, 0);
+              lv_obj_set_style_border_width(dots[i], 1, 0);
+              lv_obj_set_style_border_color(dots[i], lv_color_hex(0x666666), 0);
+            }
+          }

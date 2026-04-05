@@ -7,8 +7,10 @@
 
 // Custom UI: three-page layout (Screen / Settings / Logs)
 (function () {
-  var NUM_SLOTS = 30;
-  var DEVICE_ID = "guition-esp32-p4-jc4880p443";
+  var NUM_SLOTS = 45;
+  var PAGES = 5;
+  var SLOTS_PER_PAGE = 9;
+  var DEVICE_ID = "guition-esp32-s3-4848s040";
 
   var ICON_MAP = {
     Auto: "cog",
@@ -263,12 +265,27 @@
     ".sp-temp.sp-visible{opacity:1}" +
     ".sp-clock{position:absolute;left:50%;transform:translateX(-50%);" +
     "color:#fff;font-size:4.17cqw;white-space:nowrap}" +
-    ".sp-main{position:absolute;top:7.5cqw;left:1.04cqw;right:1.04cqw;bottom:1.04cqw;" +
+    ".sp-main{position:absolute;top:7.5cqw;left:1.04cqw;right:1.04cqw;bottom:5cqw;" +
     "display:flex;flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:2.08cqw;" +
-    "overflow-y:auto;overflow-x:hidden}" +
+    "overflow:hidden}" +
+
+    // Page indicator dots (inside preview)
+    ".sp-page-dots{position:absolute;bottom:0;left:0;right:0;height:5cqw;" +
+    "display:flex;align-items:center;justify-content:center;gap:1.67cqw}" +
+    ".sp-dot{width:1.67cqw;height:1.67cqw;border-radius:50%;border:1px solid #666;" +
+    "background:transparent;cursor:pointer;transition:all .2s}" +
+    ".sp-dot.active{background:#fff;border-color:#fff}" +
+
+    // Page nav arrows (outside preview)
+    ".sp-page-nav{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0 0}" +
+    ".sp-page-arrow{background:none;border:none;color:var(--text2);font-size:1.2rem;" +
+    "cursor:pointer;padding:4px 12px;border-radius:6px;transition:color .2s}" +
+    ".sp-page-arrow:hover{color:#fff}" +
+    ".sp-page-arrow:disabled{opacity:.2;cursor:not-allowed}" +
+    ".sp-page-label{font-size:.8rem;color:var(--text2);min-width:60px;text-align:center}" +
 
     // Preview buttons
-    ".sp-btn{width:31.25cqw;height:29.58cqw;border-radius:1.67cqw;padding:2.92cqw;" +
+    ".sp-btn{width:31.25cqw;height:28.33cqw;border-radius:1.67cqw;padding:2.92cqw;" +
     "display:flex;flex-direction:column;justify-content:space-between;" +
     "cursor:pointer;transition:all .2s;box-sizing:border-box;border:2px solid transparent;" +
     "position:relative}" +
@@ -495,6 +512,7 @@
     selectedSlots: [],
     lastClickedSlot: -1,
     activeTab: "screen",
+    currentPreviewPage: 0,
     _indoorOn: false,
     _outdoorOn: false,
     _indoorVal: null,
@@ -720,6 +738,10 @@
     // Preview
     var wrap = document.createElement("div");
     wrap.className = "sp-wrap";
+    var dotsHtml = '';
+    for (var di = 0; di < PAGES; di++) {
+      dotsHtml += '<span class="sp-dot' + (di === 0 ? ' active' : '') + '" data-page="' + di + '"></span>';
+    }
     wrap.innerHTML =
       '<div class="sp-screen">' +
       '<div class="sp-topbar">' +
@@ -727,12 +749,55 @@
       '<span class="sp-clock">--:--</span>' +
       "</div>" +
       '<div class="sp-main"></div>' +
+      '<div class="sp-page-dots">' + dotsHtml + '</div>' +
       "</div>";
     page.appendChild(wrap);
 
     els.temp = wrap.querySelector(".sp-temp");
     els.clock = wrap.querySelector(".sp-clock");
     els.previewMain = wrap.querySelector(".sp-main");
+    els.pageDots = wrap.querySelectorAll(".sp-dot");
+
+    els.pageDots.forEach(function (dot) {
+      dot.addEventListener("click", function () {
+        state.currentPreviewPage = parseInt(this.dataset.page, 10);
+        renderPreview();
+      });
+    });
+
+    // Page navigation arrows
+    var nav = document.createElement("div");
+    nav.className = "sp-page-nav";
+    var prevBtn = document.createElement("button");
+    prevBtn.className = "sp-page-arrow";
+    prevBtn.innerHTML = "&#9664;";
+    prevBtn.addEventListener("click", function () {
+      if (state.currentPreviewPage > 0) {
+        state.currentPreviewPage--;
+        renderPreview();
+      }
+    });
+    nav.appendChild(prevBtn);
+    els.prevPageBtn = prevBtn;
+
+    var pageLabel = document.createElement("span");
+    pageLabel.className = "sp-page-label";
+    pageLabel.textContent = "Page 1 / " + PAGES;
+    nav.appendChild(pageLabel);
+    els.pageLabel = pageLabel;
+
+    var nextBtn = document.createElement("button");
+    nextBtn.className = "sp-page-arrow";
+    nextBtn.innerHTML = "&#9654;";
+    nextBtn.addEventListener("click", function () {
+      if (state.currentPreviewPage < PAGES - 1) {
+        state.currentPreviewPage++;
+        renderPreview();
+      }
+    });
+    nav.appendChild(nextBtn);
+    els.nextPageBtn = nextBtn;
+    page.appendChild(nav);
 
     var hint = document.createElement("div");
     hint.className = "sp-hint";
@@ -1197,70 +1262,95 @@
     var main = els.previewMain;
     main.innerHTML = "";
 
-    state.order.forEach(function (slot, idx) {
+    var pg = state.currentPreviewPage;
+    var startSlot = pg * SLOTS_PER_PAGE + 1;
+    var endSlot = startSlot + SLOTS_PER_PAGE;
+
+    for (var slot = startSlot; slot < endSlot; slot++) {
+      var isActive = state.order.indexOf(slot) !== -1;
       var b = state.buttons[slot - 1];
-      var iconName = resolveIcon(slot);
-      var label = b.label || b.entity || "Configure";
-      var color = state.offColor;
 
-      var btn = document.createElement("div");
-      btn.className = "sp-btn" + (state.selectedSlots.indexOf(slot) !== -1 ? " sp-selected" : "");
-      btn.style.backgroundColor = "#" + (color.length === 6 ? color : "313131");
-      btn.draggable = true;
-      var hasWhenOn = b.sensor || (b.icon_on && b.icon_on !== "Auto");
-      var badgeIcon = b.sensor ? "gauge" : "swap-horizontal";
-      var sensorBadge = hasWhenOn
-        ? '<span class="sp-sensor-badge mdi mdi-' + badgeIcon + '"></span>'
-        : '';
-      btn.innerHTML =
-        sensorBadge +
-        '<span class="sp-btn-icon mdi mdi-' + iconName + '"></span>' +
-        '<span class="sp-btn-label">' + escHtml(label) + "</span>";
-      btn.addEventListener("click", function (e) {
-        if (didDrag) { didDrag = false; return; }
-        if (e.shiftKey && state.lastClickedSlot > 0) {
-          var anchorIdx = state.order.indexOf(state.lastClickedSlot);
-          var curIdx = state.order.indexOf(slot);
-          if (anchorIdx !== -1 && curIdx !== -1) {
-            var from = Math.min(anchorIdx, curIdx);
-            var to = Math.max(anchorIdx, curIdx);
-            state.selectedSlots = state.order.slice(from, to + 1);
-            renderPreview();
-            renderButtonSettings();
-            return;
-          }
-        }
-        if (e.ctrlKey || e.metaKey) {
-          var pos = state.selectedSlots.indexOf(slot);
-          if (pos !== -1) {
-            state.selectedSlots.splice(pos, 1);
-          } else {
-            state.selectedSlots.push(slot);
-            state.lastClickedSlot = slot;
-          }
-          renderPreview();
-          renderButtonSettings();
-          return;
-        }
-        if (state.selectedSlots.length === 1 && state.selectedSlots[0] === slot) {
-          selectButton(-1);
-        } else {
-          selectButton(slot);
-        }
-      });
-      btn.addEventListener("contextmenu", function (e) {
-        showContextMenu(e, slot);
-      });
-      setupPreviewDrag(btn, idx);
-      main.appendChild(btn);
-    });
+      if (isActive) {
+        var iconName = resolveIcon(slot);
+        var label = b.label || b.entity || "Configure";
+        var color = state.offColor;
 
-    if (state.order.length < NUM_SLOTS) {
-      var add = document.createElement("div");
-      add.className = "sp-btn sp-add-btn";
-      add.innerHTML = '<span class="sp-add-icon mdi mdi-plus"></span>';
-      add.addEventListener("click", addButton);
-      main.appendChild(add);
+        var btn = document.createElement("div");
+        btn.className = "sp-btn" + (state.selectedSlots.indexOf(slot) !== -1 ? " sp-selected" : "");
+        btn.style.backgroundColor = "#" + (color.length === 6 ? color : "313131");
+        var hasWhenOn = b.sensor || (b.icon_on && b.icon_on !== "Auto");
+        var badgeIcon = b.sensor ? "gauge" : "swap-horizontal";
+        var sensorBadge = hasWhenOn
+          ? '<span class="sp-sensor-badge mdi mdi-' + badgeIcon + '"></span>'
+          : '';
+        btn.innerHTML =
+          sensorBadge +
+          '<span class="sp-btn-icon mdi mdi-' + iconName + '"></span>' +
+          '<span class="sp-btn-label">' + escHtml(label) + "</span>";
+        (function (s) {
+          btn.addEventListener("click", function (e) {
+            if (e.shiftKey && state.lastClickedSlot > 0) {
+              var anchorIdx = state.order.indexOf(state.lastClickedSlot);
+              var curIdx = state.order.indexOf(s);
+              if (anchorIdx !== -1 && curIdx !== -1) {
+                var from = Math.min(anchorIdx, curIdx);
+                var to = Math.max(anchorIdx, curIdx);
+                state.selectedSlots = state.order.slice(from, to + 1);
+                renderPreview();
+                renderButtonSettings();
+                return;
+              }
+            }
+            if (e.ctrlKey || e.metaKey) {
+              var pos = state.selectedSlots.indexOf(s);
+              if (pos !== -1) {
+                state.selectedSlots.splice(pos, 1);
+              } else {
+                state.selectedSlots.push(s);
+                state.lastClickedSlot = s;
+              }
+              renderPreview();
+              renderButtonSettings();
+              return;
+            }
+            if (state.selectedSlots.length === 1 && state.selectedSlots[0] === s) {
+              selectButton(-1);
+            } else {
+              selectButton(s);
+            }
+          });
+          btn.addEventListener("contextmenu", function (e) {
+            showContextMenu(e, s);
+          });
+        })(slot);
+        main.appendChild(btn);
+      } else {
+        var add = document.createElement("div");
+        add.className = "sp-btn sp-add-btn";
+        add.innerHTML = '<span class="sp-add-icon mdi mdi-plus"></span>';
+        (function (s) {
+          add.addEventListener("click", function () { addButtonAtSlot(s); });
+        })(slot);
+        main.appendChild(add);
+      }
+    }
+
+    // Update page dots
+    if (els.pageDots) {
+      els.pageDots.forEach(function (dot, i) {
+        dot.className = "sp-dot" + (i === pg ? " active" : "");
+      });
+    }
+    if (els.pageLabel) els.pageLabel.textContent = "Page " + (pg + 1) + " / " + PAGES;
+    if (els.prevPageBtn) els.prevPageBtn.disabled = pg === 0;
+    if (els.nextPageBtn) els.nextPageBtn.disabled = pg === PAGES - 1;
+  }
+
+  function addButtonAtSlot(slot) {
+    if (state.order.indexOf(slot) === -1) {
+      state.order.push(slot);
+      postText("Button Order", state.order.join(","));
+      selectButton(slot);
     }
   }
 

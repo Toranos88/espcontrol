@@ -55,6 +55,21 @@ packages:
   btn_28:          !include { file: ../../common/config/button_template.yaml, vars: { num: "28" } }
   btn_29:          !include { file: ../../common/config/button_template.yaml, vars: { num: "29" } }
   btn_30:          !include { file: ../../common/config/button_template.yaml, vars: { num: "30" } }
+  btn_31:          !include { file: ../../common/config/button_template.yaml, vars: { num: "31" } }
+  btn_32:          !include { file: ../../common/config/button_template.yaml, vars: { num: "32" } }
+  btn_33:          !include { file: ../../common/config/button_template.yaml, vars: { num: "33" } }
+  btn_34:          !include { file: ../../common/config/button_template.yaml, vars: { num: "34" } }
+  btn_35:          !include { file: ../../common/config/button_template.yaml, vars: { num: "35" } }
+  btn_36:          !include { file: ../../common/config/button_template.yaml, vars: { num: "36" } }
+  btn_37:          !include { file: ../../common/config/button_template.yaml, vars: { num: "37" } }
+  btn_38:          !include { file: ../../common/config/button_template.yaml, vars: { num: "38" } }
+  btn_39:          !include { file: ../../common/config/button_template.yaml, vars: { num: "39" } }
+  btn_40:          !include { file: ../../common/config/button_template.yaml, vars: { num: "40" } }
+  btn_41:          !include { file: ../../common/config/button_template.yaml, vars: { num: "41" } }
+  btn_42:          !include { file: ../../common/config/button_template.yaml, vars: { num: "42" } }
+  btn_43:          !include { file: ../../common/config/button_template.yaml, vars: { num: "43" } }
+  btn_44:          !include { file: ../../common/config/button_template.yaml, vars: { num: "44" } }
+  btn_45:          !include { file: ../../common/config/button_template.yaml, vars: { num: "45" } }
   # ---------------------------------------------------------------------------
   # Addons
   # ---------------------------------------------------------------------------
