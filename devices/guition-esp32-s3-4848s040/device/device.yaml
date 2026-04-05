@@ -149,13 +149,21 @@ touchscreen:
       - lambda: |-
           id(touch_start_x) = touch.x;
           id(touch_start_y) = touch.y;
+          id(touch_last_x) = touch.x;
+          id(touch_last_y) = touch.y;
       - script.execute: screensaver_wake
+    on_update:
+      - lambda: |-
+          for (auto t : touches) {
+            id(touch_last_x) = t.x;
+            id(touch_last_y) = t.y;
+          }
     on_release:
       - lambda: |-
-          int dx = (int)touch.x - id(touch_start_x);
-          int dy = (int)touch.y - id(touch_start_y);
+          int dx = id(touch_last_x) - id(touch_start_x);
+          int dy = id(touch_last_y) - id(touch_start_y);
           lv_obj_t* cur = lv_scr_act();
-          lv_obj_t* pages[] = {id(page_1), id(page_2), id(page_3), id(page_4), id(page_5)};
+          lv_obj_t* pages[] = {id(page_1)->obj, id(page_2)->obj, id(page_3)->obj, id(page_4)->obj, id(page_5)->obj};
           bool on_page = false;
           for (int i = 0; i < 5; i++) { if (cur == pages[i]) { on_page = true; break; } }
           if (!on_page) return;
@@ -218,6 +226,12 @@ globals:
   - id: touch_start_y
     type: int
     initial_value: '0'
+  - id: touch_last_x
+    type: int
+    initial_value: '0'
+  - id: touch_last_y
+    type: int
+    initial_value: '0'
   - id: current_page
     type: int
     initial_value: '0'
@@ -226,7 +240,7 @@ script:
   - id: update_page_dots
     then:
       - lambda: |-
-          lv_obj_t* dots[] = {id(dot_1), id(dot_2), id(dot_3), id(dot_4), id(dot_5)};
+          lv_obj_t* dots[] = {id(dot_1)->obj, id(dot_2)->obj, id(dot_3)->obj, id(dot_4)->obj, id(dot_5)->obj};
           int page = id(current_page);
           for (int i = 0; i < 5; i++) {
             if (i == page) {

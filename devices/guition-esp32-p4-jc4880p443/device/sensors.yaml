@@ -572,9 +572,9 @@ number:
           if (has_on) on_val = strtoul(on_hex.c_str(), nullptr, 16);
           if (has_off) off_val = strtoul(off_hex.c_str(), nullptr, 16);
 
-          int cnt = lv_obj_get_child_cnt(id(main_page));
+          int cnt = lv_obj_get_child_cnt(id(main_page)->obj);
           for (int i = 0; i < cnt; i++) {
-            lv_obj_t *btn = lv_obj_get_child(id(main_page), i);
+            lv_obj_t *btn = lv_obj_get_child(id(main_page)->obj, i);
             if (has_on) {
               lv_obj_set_style_bg_color(btn, lv_color_hex(wc(on_val, x)),
                 static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
