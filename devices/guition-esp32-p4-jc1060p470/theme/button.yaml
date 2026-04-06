@@ -32,7 +32,7 @@ lvgl:
   # ---------------------------------------------------------------------------
   theme:
     button:
-      text_font: label_font
+      text_font: label_font_lt
       scroll_on_focus: false
       radius: $radius
       width: $button_width
