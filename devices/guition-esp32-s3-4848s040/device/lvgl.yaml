@@ -4,7 +4,8 @@
 # Defines the primary UI: a top-layer overlay with temperature and clock
 # labels, and the main page containing a flex-wrap grid of 30 button widgets.
 # Uses column_wrap for the 480x480 display with horizontal scrolling.
-# Buttons start hidden; sensors.yaml unhides active ones at boot.
+# pad_top clears the top-layer clock bar (~34px). Buttons start hidden;
+# sensors.yaml unhides active ones at boot.
 # =============================================================================
 
 lvgl:
@@ -48,8 +49,6 @@ lvgl:
   pages:
     - id: main_page
       scrollbar_mode: "off"
-      scroll_elastic: true
-      scroll_snap_x: CENTER
       layout:
         type: flex
         flex_flow: column_wrap
@@ -58,7 +57,7 @@ lvgl:
       width: 100%
       bg_color: Black
       bg_opa: cover
-      pad_top: 5
+      pad_top: 38
       pad_bottom: 5
       pad_left: 5
       pad_right: 5
