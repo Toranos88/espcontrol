@@ -8,7 +8,7 @@
 // Custom UI: three-page layout (Screen / Settings / Logs)
 (function () {
   var NUM_SLOTS = 30;
-  var DEVICE_ID = "guition-esp32-p4-jc4880p443";
+  var DEVICE_ID = "guition-esp32-s3-4848s040";
 
   var ICON_MAP = {
     Auto: "cog",
@@ -259,23 +259,23 @@
     "container-type:inline-size;font-family:Roboto,sans-serif;user-select:none}" +
     ".sp-topbar{position:absolute;top:0;left:0;right:0;height:7.5cqw;" +
     "display:flex;align-items:center;padding:0.83cqw;z-index:1}" +
-    ".sp-temp{color:#fff;font-size:4.17cqw;white-space:nowrap;opacity:0;transition:opacity .3s}" +
+    ".sp-temp{color:#fff;font-size:3.75cqw;white-space:nowrap;opacity:0;transition:opacity .3s}" +
     ".sp-temp.sp-visible{opacity:1}" +
     ".sp-clock{position:absolute;left:50%;transform:translateX(-50%);" +
-    "color:#fff;font-size:4.17cqw;white-space:nowrap}" +
-    ".sp-main{position:absolute;top:7.5cqw;left:1.04cqw;right:1.04cqw;bottom:1.04cqw;" +
+    "color:#fff;font-size:3.75cqw;white-space:nowrap}" +
+    ".sp-main{position:absolute;top:7.5cqw;left:1.04cqw;right:1.04cqw;bottom:0.83cqw;" +
     "display:flex;flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:2.08cqw;" +
     "overflow-y:auto;overflow-x:hidden}" +
 
     // Preview buttons
-    ".sp-btn{width:31.25cqw;height:29.58cqw;border-radius:1.67cqw;padding:2.92cqw;" +
+    ".sp-btn{width:30.42cqw;height:29.17cqw;border-radius:1.67cqw;padding:2.92cqw;" +
     "display:flex;flex-direction:column;justify-content:space-between;" +
     "cursor:pointer;transition:all .2s;box-sizing:border-box;border:2px solid transparent;" +
     "position:relative}" +
     ".sp-btn:hover{filter:brightness(1.15)}" +
     ".sp-btn.sp-selected{border-color:var(--accent)}" +
-    ".sp-btn-icon{font-size:10cqw;line-height:1;color:#fff}" +
-    ".sp-btn-label{font-size:4.58cqw;line-height:1.2;color:#fff;" +
+    ".sp-btn-icon{font-size:9.58cqw;line-height:1;color:#fff}" +
+    ".sp-btn-label{font-size:3.96cqw;line-height:1.2;color:#fff;" +
     "white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     ".sp-sensor-badge{position:absolute;top:2.08cqw;right:2.08cqw;font-size:3.33cqw;opacity:.5}" +
     ".sp-add-btn{border:2px dashed rgba(255,255,255,.25);background:transparent !important;" +
