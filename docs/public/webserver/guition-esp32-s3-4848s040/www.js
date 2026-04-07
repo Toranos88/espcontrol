@@ -278,6 +278,7 @@
     ".sp-btn-label{font-size:3.96cqw;line-height:1.2;color:#fff;" +
     "white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     ".sp-sensor-badge{position:absolute;top:2.08cqw;right:2.08cqw;font-size:3.33cqw;opacity:.5}" +
+    ".sp-btn-double{height:60cqw}" +
     ".sp-add-btn{border:2px dashed rgba(255,255,255,.25);background:transparent !important;" +
     "display:flex;align-items:center;justify-content:center;cursor:pointer}" +
     ".sp-add-btn:hover{border-color:var(--accent)}" +
@@ -489,6 +490,7 @@
 
   var state = {
     order: [],
+    sizes: {},
     buttons: [],
     onColor: "FF8C00",
     offColor: "313131",
@@ -530,10 +532,23 @@
 
   function parseOrder(str) {
     if (!str || !str.trim()) return [];
+    state.sizes = {};
     return str
       .split(",")
-      .map(function (s) { return parseInt(s.trim(), 10); })
+      .map(function (s) {
+        s = s.trim();
+        var dbl = s.charAt(s.length - 1) === "d";
+        var n = parseInt(s, 10);
+        if (dbl && n >= 1 && n <= NUM_SLOTS) state.sizes[n] = 2;
+        return n;
+      })
       .filter(function (n) { return n >= 1 && n <= NUM_SLOTS && !isNaN(n); });
+  }
+
+  function buildOrderStr() {
+    return state.order.map(function (slot) {
+      return slot + (state.sizes[slot] === 2 ? "d" : "");
+    }).join(",");
   }
 
   function resolveIcon(slot) {
@@ -1204,7 +1219,7 @@
       var color = state.offColor;
 
       var btn = document.createElement("div");
-      btn.className = "sp-btn" + (state.selectedSlots.indexOf(slot) !== -1 ? " sp-selected" : "");
+      btn.className = "sp-btn" + (state.sizes[slot] === 2 ? " sp-btn-double" : "") + (state.selectedSlots.indexOf(slot) !== -1 ? " sp-selected" : "");
       btn.style.backgroundColor = "#" + (color.length === 6 ? color : "313131");
       btn.draggable = true;
       var hasWhenOn = b.sensor || (b.icon_on && b.icon_on !== "Auto");
@@ -1652,7 +1667,7 @@
       state.order = newOrder;
       renderPreview();
       renderButtonSettings();
-      postText("Button Order", newOrder.join(","));
+      postText("Button Order", buildOrderStr());
       dragSrcPos = -1;
     });
   }
@@ -1724,6 +1739,20 @@
       });
       ctxMenu.appendChild(delItem);
     } else {
+      var isDbl = state.sizes[slot] === 2;
+      var dblItem = document.createElement("div");
+      dblItem.className = "sp-ctx-item";
+      dblItem.innerHTML = '<span class="mdi mdi-arrow-expand-vertical"></span>' + (isDbl ? "Single Height" : "Double Height");
+      dblItem.addEventListener("mousedown", function (ev) {
+        ev.preventDefault();
+        hideContextMenu();
+        if (state.sizes[slot] === 2) { delete state.sizes[slot]; } else { state.sizes[slot] = 2; }
+        renderPreview();
+        renderButtonSettings();
+        postText("Button Order", buildOrderStr());
+      });
+      ctxMenu.appendChild(dblItem);
+
       var dupItem = document.createElement("div");
       dupItem.className = "sp-ctx-item";
       dupItem.innerHTML = '<span class="mdi mdi-content-copy"></span>Duplicate';
@@ -1785,7 +1814,7 @@
     var slot = firstFreeSlot();
     if (slot < 0) return;
     state.order = state.order.concat(slot);
-    postText("Button Order", state.order.join(","));
+    postText("Button Order", buildOrderStr());
     selectButton(slot);
   }
 
@@ -1803,12 +1832,14 @@
       unit: src.unit,
     };
 
+    if (state.sizes[srcSlot] === 2) state.sizes[newSlot] = 2;
+
     var srcIdx = state.order.indexOf(srcSlot);
     var newOrder = state.order.slice();
     newOrder.splice(srcIdx + 1, 0, newSlot);
     state.order = newOrder;
 
-    postText("Button Order", state.order.join(","));
+    postText("Button Order", buildOrderStr());
     postText("Button " + newSlot + " Entity", src.entity);
     postText("Button " + newSlot + " Label", src.label);
     postText("Button " + newSlot + " Sensor", src.sensor);
@@ -1820,11 +1851,12 @@
 
   function deleteButton(slot) {
     state.order = state.order.filter(function (s) { return s !== slot; });
+    delete state.sizes[slot];
     var pos = state.selectedSlots.indexOf(slot);
     if (pos !== -1) state.selectedSlots.splice(pos, 1);
     renderPreview();
     renderButtonSettings();
-    postText("Button Order", state.order.join(","));
+    postText("Button Order", buildOrderStr());
     postText("Button " + slot + " Entity", "");
     postText("Button " + slot + " Label", "");
     postText("Button " + slot + " Sensor", "");
@@ -1835,6 +1867,7 @@
 
   function deleteButtons(slots) {
     state.order = state.order.filter(function (s) { return slots.indexOf(s) === -1; });
+    slots.forEach(function (slot) { delete state.sizes[slot]; });
     state.selectedSlots = [];
     state.lastClickedSlot = -1;
     slots.forEach(function (slot) {
@@ -1845,7 +1878,7 @@
       postText("Button " + slot + " Icon", "Auto");
       postText("Button " + slot + " Icon On", "Auto");
     });
-    postText("Button Order", state.order.join(","));
+    postText("Button Order", buildOrderStr());
     renderPreview();
     renderButtonSettings();
   }
@@ -1857,7 +1890,7 @@
       version: 1,
       device: DEVICE_ID,
       exported_at: new Date().toISOString(),
-      button_order: state.order.join(","),
+      button_order: buildOrderStr(),
       button_on_color: state.onColor,
       button_off_color: state.offColor,
       buttons: state.buttons.map(function (b) {
@@ -2040,7 +2073,7 @@
 
     var sseHandlers = {
       "text-button_order": function (val) {
-        orderReceived = true;
+        orderReceived = !!(val && val.trim());
         state.order = parseOrder(val);
         state.selectedSlots = state.selectedSlots.filter(function (s) {
           return state.order.indexOf(s) !== -1;
@@ -2228,7 +2261,7 @@
         state.order = autoOrder;
         renderPreview();
         renderButtonSettings();
-        postText("Button Order", autoOrder.join(","));
+        postText("Button Order", buildOrderStr());
       }
     }, 2000);
   }

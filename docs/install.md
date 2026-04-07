@@ -28,18 +28,14 @@ Connect the display to your computer with the USB-C cable, then click the button
 
 **4.3-inch (JC4880P443):**
 
-<EspInstallButton slug="guition-esp32-p4-jc4880p443" />
-
-::: warning Active development
-Support for the JC4880P443 is in active development. Expect rough edges and breaking changes.
+::: info Coming soon
+Web install for the JC4880P443 is not yet available. Use the [ESPHome Manual Setup](/esphome-manual-setup) guide to flash this device.
 :::
 
 **4-inch square (4848S040):**
 
-<EspInstallButton slug="guition-esp32-s3-4848s040" />
-
-::: warning Active development
-Support for the 4848S040 is in active development. Expect rough edges and breaking changes.
+::: info Coming soon
+Web install for the 4848S040 is not yet available. Use the [ESPHome Manual Setup](/esphome-manual-setup) guide to flash this device.
 :::
 
 ::: tip Which cable?

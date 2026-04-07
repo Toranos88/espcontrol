@@ -54,18 +54,25 @@ esphome:
             };
             constexpr int NUM_SLOTS = 15;
 
-            // --- Parse button_order (comma-separated 1-indexed slot numbers) ---
+            // --- Parse button_order (comma-separated 1-indexed slot numbers, optional "d" suffix for double-height) ---
             std::string order_str = id(button_order).state;
             std::vector<int> order;
+            bool is_double[NUM_SLOTS] = {};
             if (!order_str.empty()) {
               size_t start = 0, comma;
               while ((comma = order_str.find(',', start)) != std::string::npos) {
-                int v = atoi(order_str.substr(start, comma - start).c_str());
-                if (v >= 1 && v <= NUM_SLOTS) order.push_back(v);
+                std::string token = order_str.substr(start, comma - start);
+                bool dbl = !token.empty() && token.back() == 'd';
+                if (dbl) token.pop_back();
+                int v = atoi(token.c_str());
+                if (v >= 1 && v <= NUM_SLOTS) { order.push_back(v); is_double[v - 1] = dbl; }
                 start = comma + 1;
               }
-              int v = atoi(order_str.substr(start).c_str());
-              if (v >= 1 && v <= NUM_SLOTS) order.push_back(v);
+              std::string token = order_str.substr(start);
+              bool dbl = !token.empty() && token.back() == 'd';
+              if (dbl) token.pop_back();
+              int v = atoi(token.c_str());
+              if (v >= 1 && v <= NUM_SLOTS) { order.push_back(v); is_double[v - 1] = dbl; }
             }
 
             // --- Universal button colors ---
@@ -298,6 +305,12 @@ esphome:
               auto &s = slots[idx - 1];
               lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_HIDDEN);
               lv_obj_move_to_index(s.btn, pos++);
+
+              if (is_double[idx - 1]) {
+                lv_coord_t normal_h = lv_obj_get_style_height(s.btn, LV_PART_MAIN);
+                lv_coord_t gap = lv_obj_get_style_pad_row(lv_obj_get_parent(s.btn), LV_PART_MAIN);
+                lv_obj_set_height(s.btn, 2 * normal_h + gap);
+              }
 
               // Apply colors
               if (has_on) {
