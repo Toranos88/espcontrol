@@ -7,8 +7,9 @@
 # avoid blocking the API handshake.
 #
 # Config format per button (semicolon-delimited):
-#   entity_id;label;icon;icon_on;sensor;sensor_unit;type;subpage_config
-#   0         1     2    3       4      5           6    7
+#   entity_id;label;icon;icon_on;sensor;sensor_unit;type
+#   0         1     2    3       4      5           6
+# Subpage config is stored in a separate entity (subpage_N_config).
 #
 # MIGRATION: Devices upgrading from the old per-field entity format
 # (Button N Entity, Label, Icon, etc.) need to export their config via the
@@ -776,11 +777,17 @@ esphome:
             const lv_font_t *sp_btn_fnt = lv_obj_get_style_text_font(ref_btn, LV_PART_MAIN);
             lv_color_t sp_txt_color = lv_obj_get_style_text_color(ref_btn, LV_PART_MAIN);
 
+            esphome::text::Text *sp_configs[] = {
+              id(subpage_1_config), id(subpage_2_config), id(subpage_3_config),
+              id(subpage_4_config), id(subpage_5_config), id(subpage_6_config),
+              id(subpage_7_config), id(subpage_8_config), id(subpage_9_config),
+            };
+
             for (int si = 0; si < NUM_SLOTS; si++) {
               std::string cfg = slots[si].config->state;
               std::string btn_type = cfg_field(cfg, 6);
               if (btn_type != "subpage") continue;
-              std::string sp_cfg = cfg_field(cfg, 7);
+              std::string sp_cfg = sp_configs[si]->state;
               if (sp_cfg.empty()) continue;
 
               std::vector<std::string> pipes;

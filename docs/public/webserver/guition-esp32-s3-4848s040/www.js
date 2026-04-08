@@ -536,11 +536,14 @@
 
   function saveButtonConfig(slot) {
     var b = state.buttons[slot - 1];
-    var sp = state.subpages[slot];
-    var spCfg = sp ? serializeSubpageConfig(sp) : "";
     var cfg = [b.entity || "", b.label || "", b.icon || "Auto", b.icon_on || "Auto",
-               b.sensor || "", b.unit || "", b.type || "", spCfg].join(";");
+               b.sensor || "", b.unit || "", b.type || ""].join(";");
     postText("Button " + slot + " Config", cfg);
+  }
+
+  function saveSubpageEntity(slot) {
+    var sp = state.subpages[slot];
+    postText("Subpage " + slot + " Config", sp ? serializeSubpageConfig(sp) : "");
   }
 
   function postSelect(name, option) {
@@ -679,8 +682,7 @@
   function saveSubpageConfig(homeSlot) {
     var sp = getSubpage(homeSlot);
     sp.order = serializeSubpageGrid(sp);
-    var json = serializeSubpageConfig(sp);
-    saveButtonConfig(homeSlot);
+    saveSubpageEntity(homeSlot);
   }
 
   function subpageFirstFreeSlot(sp) {
@@ -2116,6 +2118,7 @@
     }
     postText("Button Order", serializeGrid(state.grid));
     saveButtonConfig(newSlot);
+    saveSubpageEntity(newSlot);
     selectButton(newSlot);
   }
 
@@ -2148,6 +2151,7 @@
       state.buttons[slot - 1] = { entity: "", label: "", icon: "Auto", icon_on: "Auto", sensor: "", unit: "", type: "" };
       delete state.subpages[slot];
       saveButtonConfig(slot);
+      saveSubpageEntity(slot);
     }
 
     renderPreview();
@@ -2181,6 +2185,7 @@
         state.buttons[slot - 1] = { entity: "", label: "", icon: "Auto", icon_on: "Auto", sensor: "", unit: "", type: "" };
         delete state.subpages[slot];
         saveButtonConfig(slot);
+        saveSubpageEntity(slot);
       });
       postText("Button Order", serializeGrid(state.grid));
     }
@@ -2377,6 +2382,7 @@
         state.subpages[newSlot] = spCopy;
       }
       saveButtonConfig(newSlot);
+      saveSubpageEntity(newSlot);
       lastSlot = newSlot;
     }
     postText("Button Order", serializeGrid(state.grid));
@@ -2612,7 +2618,7 @@
             sp.sizes = {};
             buildSubpageGrid(sp);
             state.subpages[String(newKey)] = sp;
-            saveButtonConfig(newKey);
+            saveSubpageEntity(newKey);
           }
         }
 
@@ -2817,16 +2823,25 @@
           b.sensor = parts[4] || "";
           b.unit = parts[5] || "";
           b.type = parts[6] || "";
-          var spCfg = parts.slice(7).join(";");
-          if (spCfg) {
-            var sp = parseSubpageConfig(spCfg);
+          scheduleRender();
+        },
+      },
+      {
+        re: /^text-subpage_(\d+)_config$/,
+        fn: function (m, val) {
+          var slot = parseInt(m[1], 10);
+          if (slot < 1 || slot > NUM_SLOTS) return;
+          if (val) {
+            var sp = parseSubpageConfig(val);
             sp.sizes = sp.sizes || {};
             buildSubpageGrid(sp);
             state.subpages[slot] = sp;
           } else {
             delete state.subpages[slot];
           }
-          scheduleRender();
+          if (state.editingSubpage === slot) {
+            scheduleRender();
+          }
         },
       },
     ];
