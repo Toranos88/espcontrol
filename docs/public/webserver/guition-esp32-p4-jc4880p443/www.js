@@ -482,7 +482,19 @@
     for (var i = 0; i < maxSlots; i++) {
       if ((grid[i] > 0 || grid[i] === -2) && sizes[grid[i]] === 2) {
         var below = i + GRID_COLS;
-        if (below < maxSlots) grid[below] = -1;
+        if (below >= maxSlots) continue;
+        if (grid[below] > 0 || grid[below] === -2) {
+          var displaced = grid[below];
+          var placed = false;
+          for (var j = 0; j < maxSlots; j++) {
+            if (grid[j] === 0) { grid[j] = displaced; placed = true; break; }
+          }
+          if (!placed) {
+            delete sizes[grid[i]];
+            continue;
+          }
+        }
+        grid[below] = -1;
       }
     }
   }
@@ -1880,39 +1892,10 @@
     var grid = c.grid.slice();
     var movingSlot = grid[fromPos];
     clearSpans(grid, c.maxSlots);
-    if (CFG.dragMode === "swap") {
-      var targetSlot = grid[toPos];
-      grid[toPos] = movingSlot;
-      grid[fromPos] = targetSlot;
-      for (var i = 0; i < c.maxSlots; i++) {
-        if ((grid[i] > 0 || grid[i] === -2) && c.sizes[grid[i]] === 2) {
-          var below = i + GRID_COLS;
-          if (below < c.maxSlots) {
-            if (grid[below] > 0 || grid[below] === -2) {
-              var displaced = grid[below];
-              grid[below] = -1;
-              for (var j = 0; j < c.maxSlots; j++) {
-                if (grid[j] === 0) { grid[j] = displaced; break; }
-              }
-            } else {
-              grid[below] = -1;
-            }
-          }
-        }
-      }
-    } else {
-      grid[fromPos] = 0;
-      if (grid[toPos] > 0 || grid[toPos] === -2) {
-        var displaced = grid[toPos];
-        grid[toPos] = 0;
-        for (var i = 1; i < c.maxSlots; i++) {
-          var candidate = (toPos + i) % c.maxSlots;
-          if (grid[candidate] === 0) { grid[candidate] = displaced; break; }
-        }
-      }
-      grid[toPos] = movingSlot;
-      applySpans(grid, c.sizes, c.maxSlots);
-    }
+    var targetSlot = grid[toPos];
+    grid[toPos] = movingSlot;
+    grid[fromPos] = targetSlot;
+    applySpans(grid, c.sizes, c.maxSlots);
     if (c.sizes[movingSlot] === 2 && toPos + GRID_COLS >= c.maxSlots) {
       delete c.sizes[movingSlot];
     }
