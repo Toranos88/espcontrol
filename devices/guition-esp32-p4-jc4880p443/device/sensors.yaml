@@ -426,10 +426,10 @@ esphome:
             constexpr int NUM_SLOTS = 15;
             constexpr int COLS = 3;
 
-            extern bool has_sensor[];
-            extern bool has_icon_on[];
-            extern const char* icon_off_cp[];
-            extern const char* icon_on_cp[];
+            static bool has_sensor[NUM_SLOTS] = {};
+            static bool has_icon_on[NUM_SLOTS] = {};
+            static const char* icon_off_cp[NUM_SLOTS] = {};
+            static const char* icon_on_cp[NUM_SLOTS] = {};
 
             auto cfg_field = [](const std::string &cfg, int idx) -> std::string {
               size_t start = 0;
@@ -493,77 +493,6 @@ esphome:
                 }
                 gpos++;
                 start = comma + 1;
-              }
-            }
-
-            // HA state subscriptions for each visible button
-            for (int p = 0; p < NUM_SLOTS; p++) {
-              int idx = positions[p];
-              if (idx < 1 || idx > NUM_SLOTS) continue;
-              auto &s = slots[idx - 1];
-              std::string cfg = s.config->state;
-              std::string entity_id = cfg_field(cfg, 0);
-              if (entity_id.empty()) continue;
-
-              std::string custom_label = cfg_field(cfg, 1);
-              if (custom_label.empty()) {
-                lv_obj_t *text_lbl = s.text_lbl;
-                api::global_api_server->subscribe_home_assistant_state(
-                  entity_id, std::string("friendly_name"),
-                  std::function<void(const std::string &)>([text_lbl](const std::string &name) {
-                    lv_label_set_text(text_lbl, name.c_str());
-                  })
-                );
-              }
-
-              lv_obj_t *btn_ptr = s.btn;
-              lv_obj_t *icon_lbl = s.icon_lbl;
-              lv_obj_t *sensor_ctr = s.sensor_container;
-              bool *slot_has_sensor = &has_sensor[idx - 1];
-              bool *slot_has_icon_on = &has_icon_on[idx - 1];
-              const char** slot_icon_off = &icon_off_cp[idx - 1];
-              const char** slot_icon_on = &icon_on_cp[idx - 1];
-              api::global_api_server->subscribe_home_assistant_state(
-                entity_id, {},
-                std::function<void(const std::string &)>([btn_ptr, icon_lbl, sensor_ctr, slot_has_sensor, slot_has_icon_on, slot_icon_off, slot_icon_on](const std::string &state) {
-                  bool is_on = state == "on" || state == "open" || state == "playing" ||
-                               state == "home" || state == "unlocked";
-                  if (is_on) {
-                    lv_obj_add_state(btn_ptr, LV_STATE_CHECKED);
-                  } else {
-                    lv_obj_clear_state(btn_ptr, LV_STATE_CHECKED);
-                  }
-                  if (*slot_has_icon_on) {
-                    lv_label_set_text(icon_lbl, is_on ? *slot_icon_on : *slot_icon_off);
-                  } else if (*slot_has_sensor) {
-                    if (is_on) {
-                      lv_obj_add_flag(icon_lbl, LV_OBJ_FLAG_HIDDEN);
-                      lv_obj_clear_flag(sensor_ctr, LV_OBJ_FLAG_HIDDEN);
-                    } else {
-                      lv_obj_clear_flag(icon_lbl, LV_OBJ_FLAG_HIDDEN);
-                      lv_obj_add_flag(sensor_ctr, LV_OBJ_FLAG_HIDDEN);
-                    }
-                  }
-                })
-              );
-
-              std::string sensor_id = cfg_field(cfg, 4);
-              if (has_sensor[idx - 1]) {
-                lv_obj_t *sensor_lbl = s.sensor_lbl;
-                api::global_api_server->subscribe_home_assistant_state(
-                  sensor_id, {},
-                  std::function<void(const std::string &)>([sensor_lbl](const std::string &state) {
-                    char *end;
-                    float val = strtof(state.c_str(), &end);
-                    if (end != state.c_str()) {
-                      char buf[16];
-                      snprintf(buf, sizeof(buf), "%.0f", val);
-                      lv_label_set_text(sensor_lbl, buf);
-                    } else {
-                      lv_label_set_text(sensor_lbl, state.c_str());
-                    }
-                  })
-                );
               }
             }
 
@@ -773,6 +702,103 @@ esphome:
               }
               return "\U000F0493";
             };
+
+            // HA state subscriptions for each visible button
+            for (int p = 0; p < NUM_SLOTS; p++) {
+              int idx = positions[p];
+              if (idx < 1 || idx > NUM_SLOTS) continue;
+              auto &s = slots[idx - 1];
+              std::string cfg = s.config->state;
+              std::string entity_id = cfg_field(cfg, 0);
+              if (entity_id.empty()) continue;
+
+              std::string sensor_id = cfg_field(cfg, 4);
+              has_sensor[idx - 1] = !sensor_id.empty();
+
+              std::string icon_on_name = cfg_field(cfg, 3);
+              has_icon_on[idx - 1] = !icon_on_name.empty() && icon_on_name != "Auto";
+              if (has_icon_on[idx - 1]) {
+                icon_on_cp[idx - 1] = find_icon(icon_on_name.c_str());
+              }
+
+              std::string icon_name = cfg_field(cfg, 2);
+              const char* icon_cp = "\U000F0493";
+              if (icon_name.empty() || icon_name == "Auto") {
+                std::string domain = entity_id.substr(0, entity_id.find('.'));
+                if      (domain == "light")         icon_cp = "\U000F0335";
+                else if (domain == "switch")        icon_cp = "\U000F0654";
+                else if (domain == "fan")           icon_cp = "\U000F0210";
+                else if (domain == "lock")          icon_cp = "\U000F033E";
+                else if (domain == "cover")         icon_cp = "\U000F1A2B";
+                else if (domain == "climate")       icon_cp = "\U000F001B";
+                else if (domain == "media_player")  icon_cp = "\U000F04C3";
+                else if (domain == "camera")        icon_cp = "\U000F0100";
+                else if (domain == "binary_sensor") icon_cp = "\U000F0D91";
+              } else {
+                icon_cp = find_icon(icon_name.c_str());
+              }
+              icon_off_cp[idx - 1] = icon_cp;
+
+              std::string custom_label = cfg_field(cfg, 1);
+              if (custom_label.empty()) {
+                lv_obj_t *text_lbl = s.text_lbl;
+                api::global_api_server->subscribe_home_assistant_state(
+                  entity_id, std::string("friendly_name"),
+                  std::function<void(const std::string &)>([text_lbl](const std::string &name) {
+                    lv_label_set_text(text_lbl, name.c_str());
+                  })
+                );
+              }
+
+              lv_obj_t *btn_ptr = s.btn;
+              lv_obj_t *icon_lbl = s.icon_lbl;
+              lv_obj_t *sensor_ctr = s.sensor_container;
+              bool *slot_has_sensor = &has_sensor[idx - 1];
+              bool *slot_has_icon_on = &has_icon_on[idx - 1];
+              const char** slot_icon_off = &icon_off_cp[idx - 1];
+              const char** slot_icon_on = &icon_on_cp[idx - 1];
+              api::global_api_server->subscribe_home_assistant_state(
+                entity_id, {},
+                std::function<void(const std::string &)>([btn_ptr, icon_lbl, sensor_ctr, slot_has_sensor, slot_has_icon_on, slot_icon_off, slot_icon_on](const std::string &state) {
+                  bool is_on = state == "on" || state == "open" || state == "playing" ||
+                               state == "home" || state == "unlocked";
+                  if (is_on) {
+                    lv_obj_add_state(btn_ptr, LV_STATE_CHECKED);
+                  } else {
+                    lv_obj_clear_state(btn_ptr, LV_STATE_CHECKED);
+                  }
+                  if (*slot_has_icon_on) {
+                    lv_label_set_text(icon_lbl, is_on ? *slot_icon_on : *slot_icon_off);
+                  } else if (*slot_has_sensor) {
+                    if (is_on) {
+                      lv_obj_add_flag(icon_lbl, LV_OBJ_FLAG_HIDDEN);
+                      lv_obj_clear_flag(sensor_ctr, LV_OBJ_FLAG_HIDDEN);
+                    } else {
+                      lv_obj_clear_flag(icon_lbl, LV_OBJ_FLAG_HIDDEN);
+                      lv_obj_add_flag(sensor_ctr, LV_OBJ_FLAG_HIDDEN);
+                    }
+                  }
+                })
+              );
+
+              if (has_sensor[idx - 1]) {
+                lv_obj_t *sensor_lbl = s.sensor_lbl;
+                api::global_api_server->subscribe_home_assistant_state(
+                  sensor_id, {},
+                  std::function<void(const std::string &)>([sensor_lbl](const std::string &state) {
+                    char *end;
+                    float val = strtof(state.c_str(), &end);
+                    if (end != state.c_str()) {
+                      char buf[16];
+                      snprintf(buf, sizeof(buf), "%.0f", val);
+                      lv_label_set_text(sensor_lbl, buf);
+                    } else {
+                      lv_label_set_text(sensor_lbl, state.c_str());
+                    }
+                  })
+                );
+              }
+            }
 
             static lv_coord_t sp_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
             static lv_coord_t sp_row_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
