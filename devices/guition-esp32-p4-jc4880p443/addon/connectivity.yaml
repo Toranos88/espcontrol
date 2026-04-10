@@ -12,12 +12,6 @@
 #           → main_page
 # =============================================================================
 
-globals:
-  - id: ha_actions_shown
-    type: bool
-    restore_value: true
-    initial_value: 'false'
-
 esphome:
   on_boot:
     priority: 600
@@ -68,13 +62,7 @@ api:
           lambda: 'return lv_scr_act() == id(ha_setup_page)->obj;'
         then:
           - script.stop: setup_screen_dim
-          - if:
-              condition:
-                lambda: 'return id(ha_actions_shown);'
-              then:
-                - script.execute: navigate_after_api
-              else:
-                - lvgl.page.show: ha_actions_page
+          - lvgl.page.show: ha_actions_page
 
 script:
   - id: navigate_after_api
