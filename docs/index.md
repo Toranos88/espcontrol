@@ -1,14 +1,18 @@
 ---
-title: Espcontrol — Home Assistant touch control panel
+title: Espcontrol — No-code smart home touch controller
 titleTemplate: :title
-description: "Touchscreen control panel for Home Assistant: up to 20 buttons with subpages, web-based configuration, automatic firmware updates."
+description: "No-code smart home controller for ESP32 touchscreens. Easy web installer, full docs, no ESPHome required. Configure buttons to control your Home Assistant devices."
 ---
 
 ![Espcontrol on a 7-inch touchscreen: home screen with temperature, clock, and control tiles](/images/home_screen_hero.jpg)
 
 # Espcontrol
 
-**Espcontrol** is free, open-source firmware that turns **Guition ESP32** touchscreens into a control panel for [Home Assistant](https://www.home-assistant.io/). Supported panels include the **7-inch JC1060P470** (1024x600, landscape, 20 buttons), the **4.3-inch JC4880P443** (480x800, portrait, 15 buttons), and the **4-inch 4848S040** (480x480, square, 9 buttons). Each panel uses a fixed grid layout sized to its screen, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page** — no coding or file editing required.
+**A no-code, super-easy-to-configure smart home controller.** Configure affordable touchscreens to control devices across your entire smart home — no ESPHome setup, no YAML, no code to write. Just flash, connect, and start adding buttons.
+
+Espcontrol is free, open-source firmware that turns **Guition ESP32** touchscreens into beautiful control panels for [Home Assistant](https://www.home-assistant.io/). It comes with **full documentation** and an **[easy-to-use web installer](/getting-started/install)** — you can go from unboxing to a working wall panel in minutes.
+
+Supported panels include the **7-inch JC1060P470** (1024x600, landscape, 20 buttons), the **4.3-inch JC4880P443** (480x800, portrait, 15 buttons), and the **4-inch 4848S040** (480x480, square, 9 buttons). Each panel uses a fixed grid layout sized to its screen, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page**.
 
 **Source code and issues:** [github.com/jtenniswood/espcontrol](https://github.com/jtenniswood/espcontrol).
 

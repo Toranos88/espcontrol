@@ -2,7 +2,11 @@
 
 # Espcontrol
 
-**Espcontrol** is free, open-source firmware that turns **Guition ESP32** touchscreens into a control panel for [Home Assistant](https://www.home-assistant.io/). Supported panels include the **7-inch JC1060P470** (1024×600, landscape, 20 buttons), the **4.3-inch JC4880P443** (480×800, portrait, 15 buttons), and the **4-inch 4848S040** (480×480, square, 9 buttons). Each panel uses a fixed grid layout sized to its screen, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page** — no coding or file editing required.
+**A no-code, super-easy-to-configure smart home controller.** Configure affordable touchscreens to control devices across your entire smart home — no ESPHome setup, no YAML, no code to write. Just flash, connect, and start adding buttons.
+
+Espcontrol is free, open-source firmware that turns **Guition ESP32** touchscreens into beautiful control panels for [Home Assistant](https://www.home-assistant.io/). It comes with **full documentation** and an **easy-to-use web installer** — you can go from unboxing to a working wall panel in minutes.
+
+Supported panels include the **7-inch JC1060P470** (1024×600, landscape, 20 buttons), the **4.3-inch JC4880P443** (480×800, portrait, 15 buttons), and the **4-inch 4848S040** (480×480, square, 9 buttons). Each panel uses a fixed grid layout sized to its screen, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page**.
 
 **Documentation and install guide:** [jtenniswood.github.io/espcontrol](https://jtenniswood.github.io/espcontrol/)
 
