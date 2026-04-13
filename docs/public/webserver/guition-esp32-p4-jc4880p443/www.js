@@ -1977,9 +1977,24 @@
     requestAnimationFrame(function () {
       _renderPending = false;
       renderPreview();
-      renderButtonSettings();
+      if (isSettingsFocused()) {
+        _settingsDeferred = true;
+      } else {
+        renderButtonSettings();
+      }
     });
   }
+
+  var _settingsDeferred = false;
+  document.addEventListener("focusout", function () {
+    if (!_settingsDeferred) return;
+    requestAnimationFrame(function () {
+      if (!isSettingsFocused()) {
+        _settingsDeferred = false;
+        renderButtonSettings();
+      }
+    });
+  });
 
   // ── Icon picker (optimized) ────────────────────────────────────────────
 

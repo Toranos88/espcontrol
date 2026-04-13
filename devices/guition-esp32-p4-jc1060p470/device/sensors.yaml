@@ -918,6 +918,9 @@ esphome:
               std::string cfg = slots[si].config->state;
               std::string btn_type = cfg_field(cfg, 6);
               if (btn_type != "subpage") continue;
+              bool sp_agg = cfg_field(cfg, 3) == "agg";
+              int *on_count = sp_agg ? new int(0) : nullptr;
+              lv_obj_t *parent_btn = sp_agg ? slots[si].btn : nullptr;
               std::string sp_cfg = sp_configs[si]->state + sp_ext_configs[si]->state;
               if (sp_cfg.empty()) continue;
 
