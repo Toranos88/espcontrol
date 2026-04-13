@@ -1110,6 +1110,11 @@ esphome:
                   lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
                     std::string *en = (std::string *)lv_event_get_user_data(e);
                     if (en && !en->empty()) {
+                      lv_obj_t *btn = lv_event_get_target(e);
+                      if (lv_obj_has_state(btn, LV_STATE_CHECKED))
+                        lv_obj_clear_state(btn, LV_STATE_CHECKED);
+                      else
+                        lv_obj_add_state(btn, LV_STATE_CHECKED);
                       api::HomeassistantActionRequest req;
                       req.service = decltype(req.service)("homeassistant.toggle");
                       req.is_event = false;

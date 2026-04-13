@@ -91,6 +91,10 @@ button:
           size_t sp = cfg.find(';');
           std::string eid = (sp != std::string::npos) ? cfg.substr(0, sp) : cfg;
           if (!eid.empty()) {
+            if (lv_obj_has_state(id(button_${num}), LV_STATE_CHECKED))
+              lv_obj_clear_state(id(button_${num}), LV_STATE_CHECKED);
+            else
+              lv_obj_add_state(id(button_${num}), LV_STATE_CHECKED);
             api::HomeassistantActionRequest req;
             req.service = decltype(req.service)("homeassistant.toggle");
             req.is_event = false;
