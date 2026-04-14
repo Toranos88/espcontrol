@@ -274,7 +274,7 @@
     ".sp-action-btn{padding:10px 20px;border:none;border-radius:6px;font-size:.9rem;" +
     "font-weight:500;cursor:pointer;font-family:inherit;transition:background .2s,opacity .2s}" +
     ".sp-action-btn:active{opacity:.8}" +
-    ".sp-delete-btn{background:var(--surface2);color:var(--text2);display:inline-flex;align-items:center;gap:6px}" +
+    ".sp-delete-btn{background:var(--surface2);color:var(--text);display:inline-flex;align-items:center;gap:6px}" +
     ".sp-delete-btn:hover{background:var(--border);color:var(--text)}" +
     ".sp-save-btn{background:var(--accent);color:#fff}" +
     ".sp-save-btn:hover{background:var(--accent-hover)}" +
@@ -1694,7 +1694,7 @@
 
     var title = document.createElement("div");
     title.className = "sp-section-title";
-    title.textContent = c.isSub ? "Subpage button settings" : "Button settings";
+    title.textContent = "Settings";
     container.appendChild(title);
 
     var panel = document.createElement("div");
