@@ -1689,7 +1689,7 @@
 
     var slot = c.selected[0];
     var bIdx = slot - 1;
-    if (c.isSub && (bIdx < 0 || bIdx >= c.buttons.length)) return;
+    if (bIdx < 0 || bIdx >= c.buttons.length) return;
     var b = c.buttons[bIdx];
 
     var title = document.createElement("div");
@@ -1933,14 +1933,12 @@
     var saveRow = document.createElement("div");
     saveRow.className = "sp-btn-row sp-btn-row--save";
 
-    if (c.isSub) {
-      var delBtn = document.createElement("button");
-      delBtn.className = "sp-action-btn sp-delete-btn";
-      delBtn.innerHTML = '<span class="mdi mdi-trash-can-outline"></span>Delete';
-      delBtn.addEventListener("click", function () { deleteSlot(slot); });
-      saveRow.appendChild(delBtn);
-      saveRow.classList.add("sp-has-delete");
-    }
+    var delBtn = document.createElement("button");
+    delBtn.className = "sp-action-btn sp-delete-btn";
+    delBtn.innerHTML = '<span class="mdi mdi-trash-can-outline"></span>Delete';
+    delBtn.addEventListener("click", function () { deleteSlot(slot); });
+    saveRow.appendChild(delBtn);
+    saveRow.classList.add("sp-has-delete");
 
     var editSubBtn = panel.querySelector(".sp-edit-subpage-btn");
     if (editSubBtn) saveRow.appendChild(editSubBtn);
@@ -2743,12 +2741,10 @@
       addCtxItem("content-cut", "Cut " + bulkSlots.length + " Buttons", function () { cutButtons(bulkSlots); });
       addCtxItem("delete", "Delete " + bulkSlots.length + " Buttons", function () { deleteButtons(bulkSlots); }, true);
     } else {
-      if (!c.isSub) {
-        var b = state.buttons[slot - 1];
-        var ctxTypeDef = BUTTON_TYPES[(b && b.type) || ""];
-        if (ctxTypeDef && ctxTypeDef.contextMenuItems) {
-          ctxTypeDef.contextMenuItems(slot, b, { addCtxItem: addCtxItem });
-        }
+      var b = c.buttons[slot - 1];
+      var ctxTypeDef = BUTTON_TYPES[(b && b.type) || ""];
+      if (ctxTypeDef && ctxTypeDef.contextMenuItems && (!c.isSub || ctxTypeDef.allowInSubpage)) {
+        ctxTypeDef.contextMenuItems(slot, b, { addCtxItem: addCtxItem });
       }
 
       var sz = c.sizes[slot] || 1;
