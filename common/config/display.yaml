@@ -36,6 +36,17 @@ switch:
     on_turn_off:
       - lambda: 'update_temp_label(id(temperatures), id(main_page)->obj, false, id(indoor_temp_enable).state);'
 
+  - platform: template
+    name: "Screen Saver: Clock"
+    internal: true
+    id: clock_screensaver_enabled
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:clock-outline"
+    entity_category: config
+    web_server:
+      sorting_group_id: sg_screensaver
+
 text:
   - platform: template
     name: "Indoor Temp Entity"
@@ -87,6 +98,22 @@ text:
       sorting_group_id: sg_screensaver
 
 number:
+  - platform: template
+    name: "Screen Saver: Clock Brightness"
+    internal: true
+    id: clock_brightness
+    min_value: 1
+    max_value: 100
+    step: 1
+    initial_value: 35
+    restore_value: true
+    optimistic: true
+    unit_of_measurement: "%"
+    entity_category: config
+    icon: "mdi:clock-outline"
+    web_server:
+      sorting_group_id: sg_screensaver
+
   # Screensaver idle timeout
   - platform: template
     name: "Screensaver Timeout"

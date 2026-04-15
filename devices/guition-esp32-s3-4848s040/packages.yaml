@@ -18,6 +18,9 @@ substitutions:
   sensor_value_font: statistics_font
   padding: 14px
   radius: 8px
+  clock_font_size: "160"
+  clock_cx: "240"
+  clock_cy: "240"
 
 packages:
   # ---------------------------------------------------------------------------
@@ -62,6 +65,7 @@ packages:
   screen_ha:       !include ../../common/device/screen_ha_setup.yaml
   screen_ha_act:   !include ../../common/device/screen_ha_actions.yaml
   screen_setup:    !include ../../common/device/screen_button_setup.yaml
+  screen_clock:    !include ../../common/device/screen_clock.yaml
   # ---------------------------------------------------------------------------
   # Main page and dynamic sensor subscriptions (after setup screens)
   # ---------------------------------------------------------------------------

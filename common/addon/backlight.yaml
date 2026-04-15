@@ -1,9 +1,12 @@
 # =============================================================================
-# BACKLIGHT - Screensaver and setup screen dim
+# BACKLIGHT - Screensaver, clock overlay, and setup screen dim
 # =============================================================================
 # Two screensaver mechanisms that coexist:
 #   1. Idle timer: configurable timeout (default 5 min), sleeps after inactivity
 #   2. Presence sensor: optional HA binary_sensor, wakes display on detection
+# When the clock screensaver is enabled, the idle timer shows a large drifting
+# clock instead of turning off the display. The label repositions each update
+# for burn-in prevention.
 # Setup screen dim: dims to 50% after 120s on static setup pages.
 # Touch wake is handled by the touchscreen on_touch in device.yaml.
 # =============================================================================
@@ -13,6 +16,9 @@ globals:
     type: bool
     initial_value: 'false'
   - id: presence_detected
+    type: bool
+    initial_value: 'false'
+  - id: is_clock_showing
     type: bool
     initial_value: 'false'
 
@@ -34,9 +40,15 @@ script:
             - globals.set:
                 id: display_asleep
                 value: 'true'
-            - light.turn_off: display_backlight
-            - lvgl.pause:
-                show_snow: true
+            - if:
+                condition:
+                  lambda: 'return id(clock_screensaver_enabled).state;'
+                then:
+                  - script.execute: show_clock_view
+                else:
+                  - light.turn_off: display_backlight
+                  - lvgl.pause:
+                      show_snow: true
 
   # Setup screen burn-in protection
   - id: setup_screen_dim
@@ -79,6 +91,7 @@ script:
             lambda: 'return id(display_asleep);'
           then:
             - script.stop: screensaver_idle_check
+            - script.execute: hide_clock_view
             - lvgl.resume:
             - delay: 100ms
             - globals.set:
@@ -87,3 +100,56 @@ script:
             - script.execute: backlight_apply_brightness
       - script.execute: screensaver_idle_check
       - script.execute: home_screen_idle_check
+
+  # Show the clock screensaver overlay
+  - id: show_clock_view
+    mode: single
+    then:
+      - lambda: |-
+          id(is_clock_showing) = true;
+          auto time = id(ha_time).now();
+          if (time.is_valid()) {
+            char buf[6];
+            snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
+            lv_label_set_text(id(clock_label), buf);
+            lv_obj_update_layout(id(clock_label));
+            lv_coord_t w = lv_obj_get_width(id(clock_label));
+            lv_coord_t h = lv_obj_get_height(id(clock_label));
+            int cx = ${clock_cx}, cy = ${clock_cy};
+            int ox = (time.minute * 7) % 61 - 30;
+            int oy = (time.minute * 13) % 41 - 20;
+            lv_obj_set_pos(id(clock_label), cx + ox - w/2, cy + oy - h/2);
+          }
+      - lvgl.widget.show: clock_screensaver
+      - light.turn_on:
+          id: display_backlight
+          brightness: !lambda 'return id(clock_brightness).state / 100.0f;'
+          transition_length: 3s
+
+  # Hide the clock screensaver overlay
+  - id: hide_clock_view
+    mode: single
+    then:
+      - lambda: 'id(is_clock_showing) = false;'
+      - lvgl.widget.hide: clock_screensaver
+
+# -----------------------------------------------------------------------------
+# Clock screensaver drift update (repositions label for burn-in prevention)
+# -----------------------------------------------------------------------------
+interval:
+  - interval: 30s
+    then:
+      - lambda: |-
+          if (!id(is_clock_showing)) return;
+          auto time = id(ha_time).now();
+          if (!time.is_valid()) return;
+          char buf[6];
+          snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
+          lv_label_set_text(id(clock_label), buf);
+          lv_obj_update_layout(id(clock_label));
+          lv_coord_t w = lv_obj_get_width(id(clock_label));
+          lv_coord_t h = lv_obj_get_height(id(clock_label));
+          int cx = ${clock_cx}, cy = ${clock_cy};
+          int ox = (time.minute * 7) % 61 - 30;
+          int oy = (time.minute * 13) % 41 - 20;
+          lv_obj_set_pos(id(clock_label), cx + ox - w/2, cy + oy - h/2);
