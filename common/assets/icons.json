@@ -355,6 +355,16 @@
       "mdi": "garage-open"
     },
     {
+      "name": "Garage Open Variant",
+      "codepoint": "F12D4",
+      "mdi": "garage-open-variant"
+    },
+    {
+      "name": "Garage Variant",
+      "codepoint": "F12D3",
+      "mdi": "garage-variant"
+    },
+    {
       "name": "Gate",
       "codepoint": "F0299",
       "mdi": "gate"
@@ -455,6 +465,11 @@
       "mdi": "lamp"
     },
     {
+      "name": "Lamp Outline",
+      "codepoint": "F17D0",
+      "mdi": "lamp-outline"
+    },
+    {
       "name": "LAN",
       "codepoint": "F0317",
       "mdi": "lan"
@@ -520,6 +535,31 @@
       "mdi": "lightbulb-off"
     },
     {
+      "name": "Lightbulb On Outline",
+      "codepoint": "F06E9",
+      "mdi": "lightbulb-on-outline"
+    },
+    {
+      "name": "Lightbulb Spot",
+      "codepoint": "F17F4",
+      "mdi": "lightbulb-spot"
+    },
+    {
+      "name": "Lightbulb Spot Off",
+      "codepoint": "F17F5",
+      "mdi": "lightbulb-spot-off"
+    },
+    {
+      "name": "Lightbulb Variant",
+      "codepoint": "F1802",
+      "mdi": "lightbulb-variant"
+    },
+    {
+      "name": "Lightbulb Variant Outline",
+      "codepoint": "F1803",
+      "mdi": "lightbulb-variant-outline"
+    },
+    {
       "name": "Lightbulb Outline",
       "codepoint": "F0336",
       "mdi": "lightbulb-outline"
@@ -533,6 +573,21 @@
       "name": "Lock",
       "codepoint": "F033E",
       "mdi": "lock"
+    },
+    {
+      "name": "Lock Open",
+      "codepoint": "F033F",
+      "mdi": "lock-open"
+    },
+    {
+      "name": "Lock Open Outline",
+      "codepoint": "F0340",
+      "mdi": "lock-open-outline"
+    },
+    {
+      "name": "Lock Outline",
+      "codepoint": "F0341",
+      "mdi": "lock-outline"
     },
     {
       "name": "Mailbox",
@@ -581,8 +636,8 @@
     },
     {
       "name": "Outdoor Lamp",
-      "codepoint": "F1020",
-      "mdi": "coach-lamp"
+      "codepoint": "F1054",
+      "mdi": "outdoor-lamp"
     },
     {
       "name": "Oven",
@@ -628,6 +683,11 @@
       "name": "Projector",
       "codepoint": "F042E",
       "mdi": "projector"
+    },
+    {
+      "name": "Projector Off",
+      "codepoint": "F1A23",
+      "mdi": "projector-off"
     },
     {
       "name": "Robot Vacuum",
@@ -730,6 +790,11 @@
       "mdi": "string-lights"
     },
     {
+      "name": "String Lights Off",
+      "codepoint": "F12BB",
+      "mdi": "string-lights-off"
+    },
+    {
       "name": "Sun",
       "codepoint": "F05A8",
       "mdi": "white-balance-sunny"
@@ -743,6 +808,11 @@
       "name": "Television",
       "codepoint": "F0502",
       "mdi": "television"
+    },
+    {
+      "name": "Television Off",
+      "codepoint": "F083B",
+      "mdi": "television-off"
     },
     {
       "name": "Thermometer",
@@ -793,6 +863,11 @@
       "name": "Wall Outlet",
       "codepoint": "F0427",
       "mdi": "power-socket"
+    },
+    {
+      "name": "Wall Sconce",
+      "codepoint": "F091C",
+      "mdi": "wall-sconce"
     },
     {
       "name": "Washer",
@@ -985,9 +1060,14 @@
       "mdi": "wind-turbine-check"
     },
     {
-      "name": "Window",
+      "name": "Window Shutter",
       "codepoint": "F111C",
-      "mdi": "window-open-variant"
+      "mdi": "window-shutter"
+    },
+    {
+      "name": "Window Shutter Open",
+      "codepoint": "F111E",
+      "mdi": "window-shutter-open"
     }
   ],
   "domain_defaults": {
