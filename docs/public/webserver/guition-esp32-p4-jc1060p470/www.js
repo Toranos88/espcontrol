@@ -2344,7 +2344,7 @@
         var b = c.buttons[bIdx];
         var iconName = resolveIcon(b);
         var label = b.label || b.entity || "Configure";
-        var color = ((b.type === "sensor" && b.precision !== "text") || b.type === "weather") ? state.sensorColor : state.offColor;
+        var color = (b.type === "sensor" || b.type === "weather") ? state.sensorColor : state.offColor;
         var previewTypeDef = BUTTON_TYPES[b.type || ""] || null;
         if (previewTypeDef && c.isSub && !previewTypeDef.allowInSubpage) previewTypeDef = null;
         var typePreview = previewTypeDef && previewTypeDef.renderPreview

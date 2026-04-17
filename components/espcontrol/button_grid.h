@@ -292,7 +292,12 @@ inline void setup_toggle_visual(BtnSlot &s, const ParsedCfg &p) {
   }
 }
 
-inline void setup_text_sensor_card(BtnSlot &s, const ParsedCfg &p) {
+inline void setup_text_sensor_card(BtnSlot &s, const ParsedCfg &p,
+                                   bool has_sensor_color, uint32_t sensor_val) {
+  if (has_sensor_color) {
+    lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
+      static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+  }
   setup_toggle_visual(s, p);
   lv_obj_clear_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
@@ -906,7 +911,7 @@ inline void grid_phase1(
 
     ParsedCfg p = parse_cfg(scfg);
     if (is_text_sensor_card(p)) {
-      setup_text_sensor_card(s, p);
+      setup_text_sensor_card(s, p, has_sensor_color, sensor_val);
       continue;
     }
     if (p.type == "sensor") {
@@ -1163,6 +1168,9 @@ inline void grid_phase2(
       }
 
       if (is_text_sensor_card(sb.type, sb.precision)) {
+        if (has_sensor_color)
+          lv_obj_set_style_bg_color(sb_btn, lv_color_hex(sensor_val),
+            static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
         lv_obj_clear_flag(sil, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
         lv_label_set_text(stl, "--");
