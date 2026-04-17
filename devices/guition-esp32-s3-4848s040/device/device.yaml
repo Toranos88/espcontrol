@@ -142,9 +142,6 @@ display:
     pclk_frequency: 8MHz
     update_interval: never
     auto_clear_enabled: False
-    transform:
-      mirror_x: false
-      mirror_y: false
 
 # ---------------------------------------------------------------------------
 # LVGL base (display binding, must be before any page definitions)

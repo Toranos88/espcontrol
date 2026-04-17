@@ -30,7 +30,11 @@
     "dragMode": "swap",
     "dragAnimation": true,
     "features": {
-      "screenRotation": true
+      "screenRotation": true,
+      "screenRotationOptions": [
+        "0",
+        "180"
+      ]
     },
     "screen": {
       "width": "100%",
@@ -1083,7 +1087,7 @@
     clockFormat: "24h",
     clockFormatOptions: ["12h", "24h"],
     screenRotation: "0",
-    screenRotationOptions: ["0", "90", "180", "270"],
+    screenRotationOptions: (CFG.features && CFG.features.screenRotationOptions) || ["0", "90", "180", "270"],
     sunrise: "",
     sunset: "",
     firmwareVersion: "",
@@ -1111,7 +1115,7 @@
 
   function normalizeScreenRotation(value) {
     value = String(value == null ? "" : value);
-    return value === "90" || value === "180" || value === "270" ? value : "0";
+    return state.screenRotationOptions.indexOf(value) !== -1 ? value : "0";
   }
 
   var els = {};
