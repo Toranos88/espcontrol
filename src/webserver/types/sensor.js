@@ -1,6 +1,6 @@
-// Read-only sensor card: displays a HA sensor value and unit (non-clickable)
+// Read-only numeric sensor card: displays a HA sensor value and unit (non-clickable)
 registerButtonType("sensor", {
-  label: "Sensor",
+  label: "Numeric Sensor",
   allowInSubpage: true,
   labelPlaceholder: "e.g. Living Room",
   onSelect: function (b) {
@@ -52,7 +52,7 @@ registerButtonType("sensor", {
     panel.appendChild(pf);
   },
   renderPreview: function (b, helpers) {
-    var label = b.label || b.sensor || "Sensor";
+    var label = b.label || b.sensor || "Numeric Sensor";
     var unit = b.unit ? helpers.escHtml(b.unit) : "";
     var prec = parseInt(b.precision || "0", 10) || 0;
     var sampleVal = (0).toFixed(prec);

@@ -52,7 +52,7 @@ struct ParsedCfg {
   std::string icon_on;     // 3  icon name for on state (blank = no swap)
   std::string sensor;      // 4  sensor entity for toggle overlay; "h" for horizontal slider
   std::string unit;        // 5  unit suffix for sensor display
-  std::string type;        // 6  button type: "" (toggle), sensor, slider, cover, push, subpage
+  std::string type;        // 6  button type: "" (toggle), sensor, text_sensor, slider, cover, push, subpage
   std::string precision;   // 7  decimal places for sensor display ("" or "0" = integer)
 };
 
@@ -284,6 +284,14 @@ inline void setup_toggle_visual(BtnSlot &s, const ParsedCfg &p) {
   }
 }
 
+inline void setup_text_sensor_card(BtnSlot &s, const ParsedCfg &p) {
+  setup_toggle_visual(s, p);
+  lv_obj_clear_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_CLICKABLE);
+  lv_label_set_text(s.text_lbl, "--");
+}
+
 // ── Home Assistant subscriptions ──────────────────────────────────────
 
 // Subscribe to a HA sensor entity and update an LVGL label with its value
@@ -302,6 +310,15 @@ inline void subscribe_sensor_value(lv_obj_t *sensor_lbl, const std::string &sens
       } else {
         lv_label_set_text(sensor_lbl, state.c_str());
       }
+    })
+  );
+}
+
+inline void subscribe_text_sensor_value(lv_obj_t *text_lbl, const std::string &sensor_id) {
+  esphome::api::global_api_server->subscribe_home_assistant_state(
+    sensor_id, {},
+    std::function<void(const std::string &)>([text_lbl](const std::string &state) {
+      lv_label_set_text(text_lbl, state.c_str());
     })
   );
 }
@@ -424,7 +441,7 @@ inline void send_slider_action(const std::string &entity_id, int value) {
 inline void handle_button_click(const std::string &cfg, int slot_num,
                                 lv_obj_t *btn_obj) {
   ParsedCfg p = parse_cfg(cfg);
-  if (p.type == "sensor") return;
+  if (p.type == "sensor" || p.type == "text_sensor") return;
   if (p.type == "push") {
     std::string label = p.label;
     if (label.empty()) {
@@ -885,6 +902,10 @@ inline void grid_phase1(
       setup_sensor_card(s, p, has_sensor_color, sensor_val);
       continue;
     }
+    if (p.type == "text_sensor") {
+      setup_text_sensor_card(s, p);
+      continue;
+    }
     if (p.type == "weather") {
       setup_weather_card(s, has_sensor_color, sensor_val);
       continue;
@@ -949,6 +970,11 @@ inline void grid_phase2(
       subscribe_sensor_value(s.sensor_lbl, p.sensor, parse_precision(p.precision));
       if (p.label.empty())
         subscribe_friendly_name(s.text_lbl, p.sensor);
+      continue;
+    }
+    if (p.type == "text_sensor") {
+      if (!p.sensor.empty())
+        subscribe_text_sensor_value(s.text_lbl, p.sensor);
       continue;
     }
     if (p.type == "weather") {
@@ -1166,6 +1192,13 @@ inline void grid_phase2(
         } else {
           subscribe_friendly_name(stl, sb.sensor);
         }
+
+      } else if (sb.type == "text_sensor") {
+        lv_obj_clear_flag(sil, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
+        lv_label_set_text(stl, "--");
+        if (!sb.sensor.empty())
+          subscribe_text_sensor_value(stl, sb.sensor);
 
       } else if (sb.type == "weather") {
         if (has_sensor_color)
