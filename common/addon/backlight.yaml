@@ -136,7 +136,7 @@ script:
             bool use_12h = id(clock_format_select).current_option() == "12h";
             if (use_12h) {
               int h12 = hr % 12; if (h12 == 0) h12 = 12;
-              snprintf(buf, sizeof(buf), "%d:%02d %s", h12, mn, hr >= 12 ? "PM" : "AM");
+              snprintf(buf, sizeof(buf), "%d:%02d", h12, mn);
             } else {
               snprintf(buf, sizeof(buf), "%02d:%02d", hr, mn);
             }
@@ -187,7 +187,7 @@ interval:
           bool use_12h = id(clock_format_select).current_option() == "12h";
           if (use_12h) {
             int h12 = hr % 12; if (h12 == 0) h12 = 12;
-            snprintf(buf, sizeof(buf), "%d:%02d %s", h12, mn, hr >= 12 ? "PM" : "AM");
+            snprintf(buf, sizeof(buf), "%d:%02d", h12, mn);
           } else {
             snprintf(buf, sizeof(buf), "%02d:%02d", hr, mn);
           }

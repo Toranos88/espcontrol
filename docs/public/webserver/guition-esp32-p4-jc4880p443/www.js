@@ -1735,7 +1735,7 @@
     state.clockFormatOptions.forEach(function (opt) {
       var o = document.createElement("option");
       o.value = opt;
-      o.textContent = opt === "12h" ? "12-hour (AM/PM)" : "24-hour";
+      o.textContent = opt === "12h" ? "12-hour" : "24-hour";
       cfSelect.appendChild(o);
     });
     cfSelect.value = state.clockFormat;
@@ -3914,14 +3914,13 @@
         timeZone: tzId, hour: "numeric", minute: "2-digit",
         hour12: state.clockFormat === "12h"
       }).formatToParts(now);
-      var h = "", m = "", dp = "";
+      var h = "", m = "";
       for (var i = 0; i < parts.length; i++) {
         if (parts[i].type === "hour") h = parts[i].value;
         else if (parts[i].type === "minute") m = parts[i].value;
-        else if (parts[i].type === "dayPeriod") dp = " " + parts[i].value;
       }
       els.clock.textContent = (state.clockFormat === "24h"
-        ? h.padStart(2, "0") : h) + ":" + m + dp;
+        ? h.padStart(2, "0") : h) + ":" + m;
     } catch (_) {
       var hr = now.getUTCHours();
       var mn = String(now.getUTCMinutes()).padStart(2, "0");
@@ -4073,7 +4072,7 @@
             d.option.forEach(function (opt) {
               var o = document.createElement("option");
               o.value = opt;
-              o.textContent = opt === "12h" ? "12-hour (AM/PM)" : "24-hour";
+              o.textContent = opt === "12h" ? "12-hour" : "24-hour";
               els.setClockFormat.appendChild(o);
             });
           }
