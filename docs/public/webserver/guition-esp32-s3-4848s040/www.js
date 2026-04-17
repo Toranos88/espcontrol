@@ -4048,6 +4048,7 @@
         state.lastClickedSlot = -1;
         renderPreview();
         renderButtonSettings();
+        switchTab("screen");
         showBanner("Configuration imported successfully", "success");
       };
       reader.readAsText(input.files[0]);
