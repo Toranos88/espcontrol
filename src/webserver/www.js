@@ -582,10 +582,11 @@
   function renderFirmwareVersion() {
     if (!els.fwVersionLabel) return;
     els.fwVersionLabel.innerHTML = '<span class="sp-fw-label">Installed </span>' +
-      escHtml(state.firmwareVersion || "Unknown");
+      escHtml(state.firmwareVersion || "Dev");
   }
 
   function isSpecificFirmwareVersion(version) {
+    version = String(version == null ? "" : version).trim().toLowerCase();
     return !!version && version !== "dev" && version !== "0.0.0";
   }
 
@@ -593,8 +594,28 @@
     version = String(version == null ? "" : version).trim();
     if (!version) return;
     if (isSpecificFirmwareVersion(state.firmwareVersion) && !isSpecificFirmwareVersion(version)) return;
-    state.firmwareVersion = version;
+    state.firmwareVersion = isSpecificFirmwareVersion(version) ? version : "Dev";
     renderFirmwareVersion();
+  }
+
+  function isFirmwareVersionEvent(id, d) {
+    id = String(id || "").toLowerCase();
+    var nameId = String(d.name_id || "").toLowerCase();
+    var domain = String(d.domain || "").toLowerCase();
+    var name = String(d.name || "").toLowerCase();
+    return nameId === "text_sensor/firmware: version" ||
+      (domain === "text_sensor" && name === "firmware: version") ||
+      (id.indexOf("text_sensor-") === 0 && id.indexOf("firmware") !== -1 && id.indexOf("version") !== -1);
+  }
+
+  function isFirmwareUpdateEvent(id, d) {
+    id = String(id || "").toLowerCase();
+    var nameId = String(d.name_id || "").toLowerCase();
+    var domain = String(d.domain || "").toLowerCase();
+    var name = String(d.name || "").toLowerCase();
+    return nameId === "update/firmware: update" ||
+      (domain === "update" && name === "firmware: update") ||
+      (id.indexOf("update-") === 0 && id.indexOf("firmware") !== -1 && id.indexOf("update") !== -1);
   }
 
   function escAttr(s) {
@@ -813,6 +834,24 @@
 
   function postNumber(name, value) {
     post("/number/" + encodeURIComponent(name) + "/set?value=" + encodeURIComponent(value));
+  }
+
+  function getJsonQuietly(path, callback) {
+    fetch(path, { cache: "no-store" }).then(function (r) {
+      if (!r.ok) return null;
+      return r.json();
+    }).then(function (data) {
+      if (data) callback(data);
+    }).catch(function () {});
+  }
+
+  function refreshFirmwareVersion() {
+    getJsonQuietly("/text_sensor/" + encodeURIComponent("Firmware: Version") + "?detail=all", function (d) {
+      setFirmwareVersion(d.state || d.value);
+    });
+    getJsonQuietly("/update/" + encodeURIComponent("Firmware: Update") + "?detail=all", function (d) {
+      setFirmwareVersion(d.current_version);
+    });
   }
 
   function waitForReboot() {
@@ -1549,6 +1588,7 @@
     fwVersionRow.appendChild(fwVersionLabel);
     els.fwVersionLabel = fwVersionLabel;
     renderFirmwareVersion();
+    refreshFirmwareVersion();
 
     var fwCheckBtn = document.createElement("button");
     fwCheckBtn.className = "sp-fw-btn";
@@ -3583,6 +3623,7 @@
       });
       clearTimeout(migrationTimer);
       migrationTimer = setTimeout(scheduleMigration, 5000);
+      refreshFirmwareVersion();
     });
 
     source.addEventListener("error", function () {
@@ -3815,13 +3856,11 @@
       var val = d.state != null ? String(d.state) : "";
 
       if (sseHandlers[id]) { sseHandlers[id](val, d); return; }
-      if (d.name_id === "text_sensor/Firmware: Version" ||
-          (d.domain === "text_sensor" && d.name === "Firmware: Version")) {
+      if (isFirmwareVersionEvent(id, d)) {
         setFirmwareVersion(val);
         return;
       }
-      if (d.name_id === "update/Firmware: Update" ||
-          (d.domain === "update" && d.name === "Firmware: Update")) {
+      if (isFirmwareUpdateEvent(id, d)) {
         setFirmwareVersion(d.current_version);
         return;
       }
