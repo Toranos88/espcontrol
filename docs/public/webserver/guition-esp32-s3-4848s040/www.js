@@ -1485,12 +1485,16 @@
     return _postQueue;
   }
 
+  function entityId(name) {
+    return String(name).toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/^_+|_+$/g, "");
+  }
+
   function postText(name, value) {
-    post("/text/" + encodeURIComponent(name) + "/set?value=" + encodeURIComponent(value));
+    post("/text/" + encodeURIComponent(entityId(name)) + "/set?value=" + encodeURIComponent(value));
   }
 
   function postScreensaverAction(value) {
-    post("/text/" + encodeURIComponent("Screensaver Action") + "/set?value=" + encodeURIComponent(value), {
+    post("/text/" + encodeURIComponent(entityId("Screensaver Action")) + "/set?value=" + encodeURIComponent(value), {
       ignore404: true,
       on404: function () {
         if (value === "dim" && !_screensaverActionMissingWarned) {
@@ -1537,23 +1541,23 @@
   }
 
   function postSelect(name, option) {
-    post("/select/" + encodeURIComponent(name) + "/set?option=" + encodeURIComponent(option));
+    post("/select/" + encodeURIComponent(entityId(name)) + "/set?option=" + encodeURIComponent(option));
   }
 
   function postButtonPress(name) {
-    post("/button/" + encodeURIComponent(name) + "/press");
+    post("/button/" + encodeURIComponent(entityId(name)) + "/press");
   }
 
   function postUpdateInstall(name) {
-    post("/update/" + encodeURIComponent(name) + "/install");
+    post("/update/" + encodeURIComponent(entityId(name)) + "/install");
   }
 
   function postSwitch(name, on) {
-    post("/switch/" + encodeURIComponent(name) + "/" + (on ? "turn_on" : "turn_off"));
+    post("/switch/" + encodeURIComponent(entityId(name)) + "/" + (on ? "turn_on" : "turn_off"));
   }
 
   function postNumber(name, value) {
-    post("/number/" + encodeURIComponent(name) + "/set?value=" + encodeURIComponent(value));
+    post("/number/" + encodeURIComponent(entityId(name)) + "/set?value=" + encodeURIComponent(value));
   }
 
   function getJsonQuietly(path, callback) {
@@ -1566,10 +1570,10 @@
   }
 
   function refreshFirmwareVersion() {
-    getJsonQuietly("/text_sensor/" + encodeURIComponent("Firmware: Version") + "?detail=all", function (d) {
+    getJsonQuietly("/text_sensor/" + encodeURIComponent(entityId("Firmware: Version")) + "?detail=all", function (d) {
       setFirmwareVersion(d.state || d.value);
     });
-    getJsonQuietly("/update/" + encodeURIComponent("Firmware: Update") + "?detail=all", function (d) {
+    getJsonQuietly("/update/" + encodeURIComponent(entityId("Firmware: Update")) + "?detail=all", function (d) {
       setFirmwareUpdateInfo(d);
     });
   }
