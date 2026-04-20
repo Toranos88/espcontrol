@@ -1017,6 +1017,10 @@ inline void grid_phase1(
 
 // ── Phase 2: HA subscriptions + subpage creation ─────────────────────
 
+inline std::string optional_text_state(esphome::text::Text **configs, int index) {
+  return (configs != nullptr && configs[index] != nullptr) ? configs[index]->state : "";
+}
+
 inline void grid_phase2(
     BtnSlot *slots, const GridConfig &cfg,
     esphome::text::Text **sp_configs,
@@ -1171,8 +1175,10 @@ inline void grid_phase2(
         ? "\U000F024B" : find_icon(p.icon.c_str());
     }
 
-    std::string sp_cfg = sp_configs[si]->state + sp_ext_configs[si]->state +
-      sp_ext2_configs[si]->state + sp_ext3_configs[si]->state;
+    std::string sp_cfg = optional_text_state(sp_configs, si) +
+      optional_text_state(sp_ext_configs, si) +
+      optional_text_state(sp_ext2_configs, si) +
+      optional_text_state(sp_ext3_configs, si);
     if (sp_cfg.empty()) continue;
 
     auto sp_btns = parse_subpage_config(sp_cfg);
@@ -1433,6 +1439,18 @@ inline void grid_phase2(
     lv_obj_set_user_data(slots[si].btn, (void *)sub_scr);
   }
   ESP_LOGI("sensors", "Phase 2: done (%lu ms)", esphome::millis());
+}
+
+inline void grid_phase2(
+    BtnSlot *slots, const GridConfig &cfg,
+    esphome::text::Text **sp_configs,
+    esphome::text::Text **sp_ext_configs,
+    const std::string &order_str,
+    const std::string &on_hex, const std::string &off_hex,
+    const std::string &sensor_hex,
+    lv_obj_t *main_page_obj) {
+  grid_phase2(slots, cfg, sp_configs, sp_ext_configs, nullptr, nullptr,
+    order_str, on_hex, off_hex, sensor_hex, main_page_obj);
 }
 
 // ── Phase 3: Temperature + presence subscriptions ────────────────────
