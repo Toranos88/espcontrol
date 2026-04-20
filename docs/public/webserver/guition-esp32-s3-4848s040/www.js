@@ -724,7 +724,7 @@
     ".fade-in{animation:fadeIn .3s ease}" +
     "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
 
-    ".sp-wrap{display:flex;justify-content:center;padding:12px var(--gap) 4px;user-select:none}" +
+    ".sp-wrap{display:flex;justify-content:center;padding:16px var(--gap) 4px;user-select:none}" +
     ".sp-screen{width:var(--screen-w);aspect-ratio:var(--screen-aspect);background:#000;" +
     "border-radius:var(--radius);position:relative;overflow:hidden;" +
     "box-shadow:0 2px 20px rgba(0,0,0,.35);border:2px solid var(--surface);" +
@@ -780,11 +780,12 @@
     ".sp-empty-cell.sp-drop-placeholder{border-color:rgba(92,156,245,.5)}" : "") +
 
     ".sp-hint{text-align:center;font-size:.7rem;color:var(--text3);padding:8px 0 12px;user-select:none}" +
-    ".sp-selection-bar:not(.sp-visible)+.sp-wrap{padding-top:20px}" +
-    ".sp-selection-bar{display:none;align-items:center;justify-content:center;gap:8px;" +
-    "padding:16px var(--gap) 0;color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none}" +
+    ".sp-selection-bar{display:none;align-items:center;justify-content:space-between;gap:12px;" +
+    "padding:14px var(--gap);background:var(--surface);border-top:1px solid var(--border);" +
+    "border-bottom:1px solid var(--border);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none}" +
     ".sp-selection-bar.sp-visible{display:flex}" +
-    ".sp-selection-label{font-size:.8rem;color:var(--text2);margin-right:4px}" +
+    ".sp-selection-label{font-size:.85rem;color:var(--text2);margin-right:auto}" +
+    ".sp-selection-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}" +
     ".sp-selection-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;" +
     "border:1px solid var(--border);border-radius:var(--action-r);background:var(--surface2);" +
     "color:var(--text);padding:8px 12px;font-size:.8rem;font-weight:500;cursor:pointer;" +
@@ -2781,6 +2782,9 @@
     label.textContent = c.selected.length === 1 ? "1 card selected" : c.selected.length + " cards selected";
     els.selectionBar.appendChild(label);
 
+    var actions = document.createElement("div");
+    actions.className = "sp-selection-actions";
+
     if (c.selected.length === 1) {
       var editBtn = document.createElement("button");
       editBtn.type = "button";
@@ -2791,7 +2795,7 @@
         e.stopPropagation();
         openSelectedCardSettings();
       });
-      els.selectionBar.appendChild(editBtn);
+      actions.appendChild(editBtn);
     }
 
     var menuBtn = document.createElement("button");
@@ -2804,7 +2808,8 @@
       e.stopPropagation();
       showSelectionMenu(e);
     });
-    els.selectionBar.appendChild(menuBtn);
+    actions.appendChild(menuBtn);
+    els.selectionBar.appendChild(actions);
   }
 
   function closeSettings() {
