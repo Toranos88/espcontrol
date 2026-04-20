@@ -152,9 +152,6 @@ display:
     pclk_frequency: 8MHz
     update_interval: never
     auto_clear_enabled: False
-    transform:
-      mirror_x: false
-      mirror_y: false
 
 # ---------------------------------------------------------------------------
 # LVGL base (display binding, must be before any page definitions)
@@ -162,7 +159,7 @@ display:
 lvgl:
   buffer_size: 25%
   displays: my_display
-  rotation: 0
+  rotation: 180
   touchscreens: my_touchscreen
 
 script:
@@ -172,21 +169,21 @@ script:
           condition:
             lambda: 'return id(screen_rotation_select).current_option() == "90";'
           then:
-            - lvgl.display.set_rotation: 90
+            - lvgl.display.set_rotation: 270
           else:
             - if:
                 condition:
                   lambda: 'return id(screen_rotation_select).current_option() == "180";'
                 then:
-                  - lvgl.display.set_rotation: 180
+                  - lvgl.display.set_rotation: 0
                 else:
                   - if:
                       condition:
                         lambda: 'return id(screen_rotation_select).current_option() == "270";'
                       then:
-                        - lvgl.display.set_rotation: 270
+                        - lvgl.display.set_rotation: 90
                       else:
-                        - lvgl.display.set_rotation: 0
+                        - lvgl.display.set_rotation: 180
 
 select:
   - platform: template
