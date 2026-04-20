@@ -1079,6 +1079,7 @@
     "climate": "Air Conditioner",
     "media_player": "Speaker",
     "camera": "Camera",
+    "button": "Gesture Tap",
     "binary_sensor": "Motion Sensor"
   }
 }

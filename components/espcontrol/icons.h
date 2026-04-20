@@ -253,6 +253,7 @@ inline const char* domain_default_icon(const std::string &domain) {
   if (domain == "climate")                    return "\U000F001B";  // Air Conditioner
   if (domain == "media_player")               return "\U000F04C3";  // Speaker
   if (domain == "camera")                     return "\U000F0100";  // Camera
+  if (domain == "button")                     return "\U000F0741";  // Gesture Tap
   if (domain == "binary_sensor")              return "\U000F0D91";  // Motion Sensor
   // --- GENERATED:DOMAIN_ICONS END ---
   return "\U000F0493";

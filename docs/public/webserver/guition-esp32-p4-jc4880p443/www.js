@@ -181,6 +181,7 @@
     climate: "air-conditioner",
     media_player: "speaker",
     camera: "camera",
+    button: "gesture-tap",
     binary_sensor: "motion-sensor",
     // --- GENERATED:DOMAIN_ICONS END ---
   };

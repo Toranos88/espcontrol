@@ -146,6 +146,35 @@ switch:
       inverted: true
     restore_mode: RESTORE_DEFAULT_OFF
 
+# Momentary relay buttons for push-button/dimmer inputs.
+button:
+  - platform: template
+    name: Relay 1 Push
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - switch.turn_on: relay_1
+        - delay: 200ms
+        - switch.turn_off: relay_1
+
+  - platform: template
+    name: Relay 2 Push
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - switch.turn_on: relay_2
+        - delay: 200ms
+        - switch.turn_off: relay_2
+
+  - platform: template
+    name: Relay 3 Push
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - switch.turn_on: relay_3
+        - delay: 200ms
+        - switch.turn_off: relay_3
+
 # ---------------------------------------------------------------------------
 # SPI bus (used by MIPI RGB driver for ST7701S init sequence)
 # ---------------------------------------------------------------------------

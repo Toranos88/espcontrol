@@ -12,15 +12,18 @@ The relays have been confirmed working on the relay variant using the standard 4
 
 ## Home Assistant entities
 
-On the 4848S040 firmware, Espcontrol exposes three relay switch entities to Home Assistant:
+On the 4848S040 firmware, Espcontrol exposes each relay in two ways:
 
-| Home Assistant name | Typical entity ID | Relay pin |
-|---|---|---|
-| **Relay 1** | `switch.<device_name>_relay_1` | GPIO40 |
-| **Relay 2** | `switch.<device_name>_relay_2` | GPIO2 |
-| **Relay 3** | `switch.<device_name>_relay_3` | GPIO1 |
+- **Relay switches** stay on until you turn them off again.
+- **Relay push buttons** turn the relay on for 200 ms, then turn it off again.
 
-They appear as normal Home Assistant switch entities on the Espcontrol device. You can control them from Home Assistant dashboards, automations, scripts, and voice assistants.
+| Relay | Switch entity | Push button entity | Relay pin |
+|---|---|---|---|
+| **Relay 1** | `switch.<device_name>_relay_1` | `button.<device_name>_relay_1_push` | GPIO40 |
+| **Relay 2** | `switch.<device_name>_relay_2` | `button.<device_name>_relay_2_push` | GPIO2 |
+| **Relay 3** | `switch.<device_name>_relay_3` | `button.<device_name>_relay_3_push` | GPIO1 |
+
+They appear as normal Home Assistant entities on the Espcontrol device. You can control them from Home Assistant dashboards, automations, scripts, and voice assistants.
 
 ![Home Assistant controls card showing Display Backlight plus Relay 1, Relay 2, and Relay 3 switches](/images/relay-controls.svg)
 
@@ -28,14 +31,16 @@ Home Assistant may adjust the exact entity ID if you have renamed the device or 
 
 ## Using relays on the touchscreen
 
-The relay switches are exposed to Home Assistant, so you can also add them back onto the Espcontrol touchscreen as button cards:
+The relay entities are exposed to Home Assistant, so you can also add them back onto the Espcontrol touchscreen as button cards:
 
 1. Open the Espcontrol setup page in your browser.
 2. Choose an empty button slot.
-3. Set the button entity to the relay switch entity, such as `switch.kitchen_panel_relay_1`.
+3. Set the button entity to a relay switch entity, such as `switch.kitchen_panel_relay_1`, or a relay push button entity, such as `button.kitchen_panel_relay_1_push`.
 4. Save the button configuration.
 
-Tapping that button will toggle the relay through Home Assistant, the same as any other switch entity.
+Tapping a relay switch entity will toggle the relay through Home Assistant. Tapping a relay push button entity will briefly pulse the relay instead.
+
+The push button entities are useful when the relay is wired in parallel with existing momentary wall switches, for example when it is driving a dimmer or lighting controller that expects a short button press rather than a permanent on/off output.
 
 ## Hardware detection
 

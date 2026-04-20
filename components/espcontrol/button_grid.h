@@ -414,10 +414,16 @@ inline void subscribe_toggle_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
 
 // ── Home Assistant actions ────────────────────────────────────────────
 
-// Send homeassistant.toggle for a given entity_id
+inline bool is_button_entity(const std::string &entity_id) {
+  return entity_id.size() > 7 && entity_id.compare(0, 7, "button.") == 0;
+}
+
+// Press HA button entities; toggle other bound entities.
 inline void send_toggle_action(const std::string &entity_id) {
   esphome::api::HomeassistantActionRequest req;
-  req.service = decltype(req.service)("homeassistant.toggle");
+  req.service = is_button_entity(entity_id)
+    ? decltype(req.service)("button.press")
+    : decltype(req.service)("homeassistant.toggle");
   req.is_event = false;
   req.data.init(1);
   auto &kv = req.data.emplace_back();
