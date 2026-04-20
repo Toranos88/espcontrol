@@ -722,6 +722,10 @@
     return ae && els.buttonSettings && els.buttonSettings.contains(ae);
   }
 
+  function isSettingsOpen() {
+    return !!(els.settingsOverlay && els.settingsOverlay.classList.contains("sp-visible"));
+  }
+
   // ── Context abstraction ────────────────────────────────────────────────
 
   function ctx() {
@@ -2193,6 +2197,7 @@
 
   function closeSettings() {
     hideSettingsOverlay();
+    _settingsDeferred = false;
     ctx().setSelected([]);
     renderPreview();
   }
@@ -2582,7 +2587,7 @@
     requestAnimationFrame(function () {
       _renderPending = false;
       renderPreview();
-      if (isSettingsFocused()) {
+      if (isSettingsOpen() || isSettingsFocused()) {
         _settingsDeferred = true;
       } else {
         renderButtonSettings();
@@ -2591,9 +2596,11 @@
   }
 
   var _settingsDeferred = false;
-  document.addEventListener("focusout", function () {
+  document.addEventListener("focusout", function (e) {
     if (!_settingsDeferred) return;
+    if (e.relatedTarget && els.buttonSettings && els.buttonSettings.contains(e.relatedTarget)) return;
     requestAnimationFrame(function () {
+      if (isSettingsOpen()) return;
       if (!isSettingsFocused()) {
         _settingsDeferred = false;
         renderButtonSettings();
