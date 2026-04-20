@@ -2799,7 +2799,7 @@
     menuBtn.className = "sp-selection-btn";
     menuBtn.setAttribute("aria-label", "Card actions");
     menuBtn.innerHTML = '<span class="mdi mdi-dots-horizontal"></span>';
-    menuBtn.addEventListener("mousedown", function (e) {
+    menuBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
       showSelectionMenu(e);
