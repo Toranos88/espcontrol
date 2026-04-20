@@ -10,6 +10,11 @@
 #include <cstdio>
 #include "sun_calc.h"
 
+#ifdef USE_ESP32
+#include <esp_sleep.h>
+#include <esp_system.h>
+#endif
+
 // ── Sunrise/sunset recalculation ─────────────────────────────────────
 
 struct SunCalcResult {

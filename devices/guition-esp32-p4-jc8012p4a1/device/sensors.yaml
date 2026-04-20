@@ -49,7 +49,6 @@ esphome:
             cfg.num_slots = 20;
             cfg.cols = 5;
             cfg.color_correction = true;
-            cfg.color_red_percent = 90;
             cfg.wrap_tall_labels = true;
             cfg.sp_sensor_font = id(statistics_font_lt)->get_lv_font();
             grid_phase1(slots, cfg,
@@ -107,7 +106,6 @@ esphome:
             cfg.num_slots = 20;
             cfg.cols = 5;
             cfg.color_correction = true;
-            cfg.color_red_percent = 90;
             cfg.wrap_tall_labels = true;
             cfg.sp_sensor_font = id(statistics_font_lt)->get_lv_font();
             grid_phase2(slots, cfg, sp_cfgs, sp_ext,

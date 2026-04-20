@@ -164,13 +164,11 @@ inline uint32_t parse_hex_color(const std::string &hex, bool &valid) {
   return strtoul(hex.c_str(), nullptr, 16);
 }
 
-// Apply per-panel RGB channel scaling to compensate for display color shift.
-inline uint32_t correct_color(uint32_t rgb, uint8_t red_percent = 100,
-                              uint8_t green_percent = 80,
-                              uint8_t blue_percent = 100) {
-  uint8_t r = (uint8_t)(((rgb >> 16) & 0xFF) * red_percent / 100);
-  uint8_t g = (uint8_t)(((rgb >> 8) & 0xFF) * green_percent / 100);
-  uint8_t b = (uint8_t)((rgb & 0xFF) * blue_percent / 100);
+// Reduce green channel to 80% to compensate for display panel color shift
+inline uint32_t correct_color(uint32_t rgb) {
+  uint8_t r = (rgb >> 16) & 0xFF;
+  uint8_t g = (uint8_t)(((rgb >> 8) & 0xFF) * 80 / 100);
+  uint8_t b = rgb & 0xFF;
   return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
 }
 
@@ -873,24 +871,9 @@ struct GridConfig {
   int num_slots;
   int cols;
   bool color_correction;
-  uint8_t color_red_percent;
-  uint8_t color_green_percent;
-  uint8_t color_blue_percent;
   bool wrap_tall_labels;
   const lv_font_t *sp_sensor_font;
 };
-
-inline uint8_t color_percent_or_default(uint8_t configured, uint8_t fallback) {
-  return configured == 0 ? fallback : configured;
-}
-
-inline uint32_t correct_grid_color(uint32_t rgb, const GridConfig &cfg) {
-  return correct_color(
-    rgb,
-    color_percent_or_default(cfg.color_red_percent, 100),
-    color_percent_or_default(cfg.color_green_percent, 80),
-    color_percent_or_default(cfg.color_blue_percent, 100));
-}
 
 // ── Phase 1: Visual setup ────────────────────────────────────────────
 
@@ -925,9 +908,9 @@ inline void grid_phase1(
   uint32_t sensor_val = parse_hex_color(sensor_hex, has_sensor_color);
 
   if (cfg.color_correction) {
-    if (has_on) on_val = correct_grid_color(on_val, cfg);
-    if (has_off) off_val = correct_grid_color(off_val, cfg);
-    if (has_sensor_color) sensor_val = correct_grid_color(sensor_val, cfg);
+    if (has_on) on_val = correct_color(on_val);
+    if (has_off) off_val = correct_color(off_val);
+    if (has_sensor_color) sensor_val = correct_color(sensor_val);
   }
 
   for (int i = 0; i < NS; i++)
@@ -1007,9 +990,9 @@ inline void grid_phase2(
   uint32_t sensor_val = parse_hex_color(sensor_hex, has_sensor_color);
 
   if (cfg.color_correction) {
-    if (has_on) on_val = correct_grid_color(on_val, cfg);
-    if (has_off) off_val = correct_grid_color(off_val, cfg);
-    if (has_sensor_color) sensor_val = correct_grid_color(sensor_val, cfg);
+    if (has_on) on_val = correct_color(on_val);
+    if (has_off) off_val = correct_color(off_val);
+    if (has_sensor_color) sensor_val = correct_color(sensor_val);
   }
 
   OrderResult parsed;
