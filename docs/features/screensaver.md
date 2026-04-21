@@ -6,9 +6,13 @@ description:
 
 # Screensaver
 
-To save power and protect the display, the panel activates a screensaver when it's not being used. The screen shows a gentle snow animation and the backlight turns off. Touch the screen to wake it up.
+The panel can use a screensaver when it's not being used. When active, the screen shows a gentle snow animation and the backlight turns off. Touch the screen to wake it up.
 
-There are two ways to control the screensaver, configured in the **Settings** tab on the [Setup](/features/setup) page:
+There are three screen saver modes, configured in the **Settings** tab on the [Setup](/features/setup) page:
+
+## Disabled
+
+The screensaver does not run automatically. This is the default setting.
 
 ## Timer
 

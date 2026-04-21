@@ -545,7 +545,7 @@
     indoorEntity: "",
     outdoorEntity: "",
     presenceEntity: "",
-    screensaverMode: "",
+    screensaverMode: "disabled",
     _screensaverModeReceived: false,
     clockScreensaverOn: true,
     clockBrightness: 35,
@@ -590,7 +590,7 @@
   function getActiveScreensaverMode() {
     if (state.screensaverMode === "sensor") return "sensor";
     if (state.screensaverMode === "timer") return "timer";
-    return state.presenceEntity ? "sensor" : "timer";
+    return "disabled";
   }
 
   function normalizeScreenRotation(value) {
@@ -1746,12 +1746,16 @@
     ssBody.appendChild(fieldLabel("Mode"));
     var segment = document.createElement("div");
     segment.className = "sp-segment";
+    var disabledBtn = document.createElement("button");
+    disabledBtn.textContent = "Disabled";
+    disabledBtn.type = "button";
     var timerBtn = document.createElement("button");
     timerBtn.textContent = "Timer";
     timerBtn.type = "button";
     var sensorBtn = document.createElement("button");
     sensorBtn.textContent = "Sensor";
     sensorBtn.type = "button";
+    segment.appendChild(disabledBtn);
     segment.appendChild(timerBtn);
     segment.appendChild(sensorBtn);
     ssBody.appendChild(segment);
@@ -1835,11 +1839,17 @@
 
     function setSsMode(mode) {
       ssMode = mode;
+      disabledBtn.className = mode === "disabled" ? "active" : "";
       timerBtn.className = mode === "timer" ? "active" : "";
       sensorBtn.className = mode === "sensor" ? "active" : "";
       timerPanel.style.display = mode === "timer" ? "" : "none";
       sensorPanel.style.display = mode === "sensor" ? "" : "none";
     }
+    disabledBtn.addEventListener("click", function () {
+      setSsMode("disabled");
+      state.screensaverMode = "disabled";
+      postText("Screensaver Mode", "disabled");
+    });
     timerBtn.addEventListener("click", function () {
       setSsMode("timer");
       state.screensaverMode = "timer";
@@ -4227,8 +4237,12 @@
           postSwitch("Outdoor Temp Enable", !!s.outdoor_temp_enable);
           postText("Indoor Temp Entity", s.indoor_temp_entity || "");
           postText("Outdoor Temp Entity", s.outdoor_temp_entity || "");
-          var importedScreensaverMode = s.screensaver_mode || (s.presence_sensor_entity ? "sensor" : "timer");
-          if (importedScreensaverMode !== "sensor") importedScreensaverMode = "timer";
+          var importedScreensaverMode = s.screensaver_mode || "disabled";
+          if (importedScreensaverMode !== "sensor" &&
+              importedScreensaverMode !== "timer" &&
+              importedScreensaverMode !== "disabled") {
+            importedScreensaverMode = "disabled";
+          }
           postText("Screensaver Mode", importedScreensaverMode);
           postText("Presence Sensor Entity", s.presence_sensor_entity || "");
           postSwitch("Screen Saver: Clock", s.clock_screensaver != null ? !!s.clock_screensaver : true);
@@ -4447,16 +4461,13 @@
       "text-presence_sensor_entity": function (val) {
         state.presenceEntity = val;
         syncInput(els.setPresence, val);
-        if (!state._screensaverModeReceived) {
-          state.screensaverMode = val ? "sensor" : "timer";
-          if (els.setSsMode) els.setSsMode(state.screensaverMode);
-        } else if (state.screensaverMode === "") {
+        if (state.screensaverMode === "") {
           if (els.setSsMode) els.setSsMode(getActiveScreensaverMode());
         }
       },
       "text-screensaver_mode": function (val) {
         state._screensaverModeReceived = true;
-        state.screensaverMode = val === "sensor" || val === "timer" ? val : "";
+        state.screensaverMode = val === "sensor" || val === "timer" || val === "disabled" ? val : "disabled";
         if (els.setSsMode) els.setSsMode(getActiveScreensaverMode());
       },
       "number-screen__daytime_brightness": function (val) {

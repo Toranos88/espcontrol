@@ -98,7 +98,7 @@ text:
     id: screensaver_mode
     optimistic: true
     restore_value: true
-    initial_value: ""
+    initial_value: "disabled"
     min_length: 0
     max_length: 10
     mode: text

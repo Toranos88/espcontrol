@@ -1,9 +1,10 @@
 # =============================================================================
 # BACKLIGHT - Screensaver, clock overlay, and setup screen dim
 # =============================================================================
-# Two screensaver mechanisms that coexist:
-#   1. Idle timer: configurable timeout (default 5 min), sleeps after inactivity
-#   2. Presence sensor: optional HA binary_sensor, wakes display on detection
+# Screensaver modes:
+#   1. Disabled: no automatic screensaver
+#   2. Idle timer: configurable timeout, sleeps after inactivity
+#   3. Presence sensor: optional HA binary_sensor, wakes display on detection
 # Screen schedule can also force the physical backlight off outside configured
 # hours. It shares the same display sleep/wake plumbing but tracks its own state.
 # When the clock screensaver is enabled, the idle timer shows a drifting clock
@@ -41,17 +42,23 @@ script:
   - id: screensaver_idle_check
     mode: restart
     then:
-      - delay: !lambda |-
-          float val = id(screensaver_timeout).state;
-          if (std::isnan(val) || val <= 0) val = 300;
-          return (int)(val * 1000);
       - if:
           condition:
-            lambda: 'return id(screensaver_mode).state != "timer" && id(presence_detected);'
+            lambda: |-
+              return id(screensaver_mode).state == "timer" ||
+                     id(screensaver_mode).state == "sensor";
           then:
-            - script.execute: screensaver_idle_check
-          else:
-            - script.execute: screensaver_sleep_timer
+            - delay: !lambda |-
+                float val = id(screensaver_timeout).state;
+                if (std::isnan(val) || val <= 0) val = 300;
+                return (int)(val * 1000);
+            - if:
+                condition:
+                  lambda: 'return id(screensaver_mode).state == "sensor" && id(presence_detected);'
+                then:
+                  - script.execute: screensaver_idle_check
+                else:
+                  - script.execute: screensaver_sleep_timer
 
   # Timer mode honours the clock/display-off setting.
   - id: screensaver_sleep_timer
