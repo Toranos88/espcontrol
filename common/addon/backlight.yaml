@@ -104,6 +104,7 @@ script:
           id: display_backlight
           transition_length: 0s
       - output.turn_off: gpio_backlight_pwm
+      - lambda: 'id(gpio_backlight_pwm).turn_off();'
 
   - id: backlight_sleep_display_off
     mode: restart
@@ -116,6 +117,19 @@ script:
       - script.execute: backlight_force_display_off
       - lvgl.pause:
           show_snow: true
+      - script.execute: backlight_force_display_off
+
+  - id: backlight_schedule_display_off
+    mode: restart
+    then:
+      - script.execute: backlight_force_display_off
+      - lvgl.resume:
+      - script.execute: hide_clock_view
+      - lvgl.page.show: screen_off_page
+      - delay: 50ms
+      - script.execute: backlight_force_display_off
+      - lvgl.pause:
+          show_snow: false
       - script.execute: backlight_force_display_off
 
   # Touchscreen long-press sleep. This is stronger than the automatic schedule;
@@ -139,7 +153,7 @@ script:
       - globals.set:
           id: manual_wake_ms
           value: '0'
-      - script.execute: backlight_sleep_display_off
+      - script.execute: backlight_schedule_display_off
 
   # Setup screen burn-in protection
   - id: setup_screen_dim
@@ -231,6 +245,11 @@ script:
                   - globals.set:
                       id: display_asleep
                       value: 'false'
+                  - if:
+                      condition:
+                        lambda: 'return lv_scr_act() == id(screen_off_page)->obj;'
+                      then:
+                        - script.execute: navigate_after_api
                   - script.execute: backlight_apply_brightness
                   - delay: 300ms
                   - script.execute: hide_clock_view
@@ -240,6 +259,11 @@ script:
                   - globals.set:
                       id: display_asleep
                       value: 'false'
+                  - if:
+                      condition:
+                        lambda: 'return lv_scr_act() == id(screen_off_page)->obj;'
+                      then:
+                        - script.execute: navigate_after_api
                   - script.execute: backlight_apply_brightness
       - script.execute: screensaver_idle_check
       - script.execute: home_screen_idle_check

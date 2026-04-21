@@ -209,7 +209,7 @@ script:
             - globals.set:
                 id: manual_wake_ms
                 value: '0'
-            - script.execute: backlight_force_display_off
+            - script.execute: backlight_schedule_display_off
           else:
             - globals.set:
                 id: screen_schedule_asleep
@@ -240,7 +240,7 @@ script:
           id: manual_wake_ms
           value: '0'
       - lambda: 'global_preferences->sync();'
-      - script.execute: backlight_sleep_display_off
+      - script.execute: backlight_schedule_display_off
 
   # ---------------------------------------------------------------------------
   # Wake automatically at the start of the schedule window
@@ -264,6 +264,11 @@ script:
       - lambda: 'global_preferences->sync();'
       - lvgl.resume:
       - script.execute: hide_clock_view
+      - if:
+          condition:
+            lambda: 'return lv_scr_act() == id(screen_off_page)->obj;'
+          then:
+            - script.execute: navigate_after_api
       - delay: 100ms
       - globals.set:
           id: display_asleep
@@ -318,7 +323,7 @@ script:
           }
 
           if (id(screen_schedule_asleep)) {
-            id(backlight_force_display_off).execute();
+            id(backlight_schedule_display_off).execute();
           } else {
             id(screen_schedule_sleep).execute();
           }
@@ -381,6 +386,11 @@ script:
       - lambda: |-
           if (id(display_asleep)) return;
           auto now = id(ha_time).now();
+          if (id(screen_schedule_asleep) ||
+              (id(schedule_enabled).state && !now.is_valid())) {
+            id(backlight_force_display_off).execute();
+            return;
+          }
           bool is_day = id(last_is_daytime);
           float pct = calc_brightness_pct(
             id(sunrise_sunset_valid), id(sunrise_hour), id(sunrise_minute),
@@ -423,6 +433,16 @@ script:
 # =============================================================================
 
 interval:
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(screen_schedule_asleep) ||
+                     (id(schedule_enabled).state && !id(ha_time).now().is_valid());
+          then:
+            - script.execute: backlight_force_display_off
+
   - interval: 60s
     then:
       - script.execute: screen_schedule_check

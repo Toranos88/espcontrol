@@ -55,6 +55,9 @@ lvgl:
                   hidden: true
                   width: 0
                   height: 0
+    - id: screen_off_page
+      bg_color: 0x000000
+      scrollable: false
 
 esphome:
   on_boot:
