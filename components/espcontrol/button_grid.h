@@ -340,6 +340,20 @@ inline int &calendar_card_count() {
   return count;
 }
 
+struct CalendarDateState {
+  bool valid;
+  int day;
+  int month;
+};
+
+inline CalendarDateState &calendar_date_state() {
+  static CalendarDateState state = {false, 0, 0};
+  return state;
+}
+
+inline void apply_calendar_card_text(lv_obj_t *day_lbl, lv_obj_t *month_lbl,
+                                     bool valid, int day, int month);
+
 inline void reset_calendar_cards() {
   calendar_card_count() = 0;
 }
@@ -351,6 +365,8 @@ inline void register_calendar_card(lv_obj_t *day_lbl, lv_obj_t *month_lbl) {
     return;
   }
   calendar_card_refs()[count++] = {day_lbl, month_lbl};
+  CalendarDateState &state = calendar_date_state();
+  apply_calendar_card_text(day_lbl, month_lbl, state.valid, state.day, state.month);
 }
 
 inline const char *calendar_month_name(int month) {
@@ -362,7 +378,8 @@ inline const char *calendar_month_name(int month) {
   return months[month - 1];
 }
 
-inline void update_calendar_cards(bool valid, int day, int month) {
+inline void apply_calendar_card_text(lv_obj_t *day_lbl, lv_obj_t *month_lbl,
+                                     bool valid, int day, int month) {
   char day_buf[4];
   const char *day_text = "--";
   const char *month_text = "Date";
@@ -371,12 +388,21 @@ inline void update_calendar_cards(bool valid, int day, int month) {
     day_text = day_buf;
     month_text = calendar_month_name(month);
   }
+  if (day_lbl) lv_label_set_text(day_lbl, day_text);
+  if (month_lbl) lv_label_set_text(month_lbl, month_text);
+}
+
+inline void update_calendar_cards(bool valid, int day, int month) {
+  CalendarDateState &state = calendar_date_state();
+  state.valid = valid && day >= 1 && day <= 31 && month >= 1 && month <= 12;
+  state.day = state.valid ? day : 0;
+  state.month = state.valid ? month : 0;
 
   CalendarCardRef *refs = calendar_card_refs();
   int count = calendar_card_count();
   for (int i = 0; i < count; i++) {
-    if (refs[i].day_lbl) lv_label_set_text(refs[i].day_lbl, day_text);
-    if (refs[i].month_lbl) lv_label_set_text(refs[i].month_lbl, month_text);
+    apply_calendar_card_text(refs[i].day_lbl, refs[i].month_lbl,
+                             state.valid, state.day, state.month);
   }
 }
 

@@ -22,16 +22,16 @@ Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A
 
 ![Toggle card showing a Heater icon](/images/card-toggle.png)
 
-1. **Choose a type** — **[Button](/card-types/buttons)** to trigger Home Assistant automations with a single tap, **[Calendar](/card-types/calendar)** to show today's date, **[Cover](/card-types/covers)** to control blinds and shutters, **[Sensor](/card-types/sensors)** to display a live numeric reading or text state, **[Slider](/card-types/sliders)** to control light brightness, **Subpage** to create a folder of extra cards, **Toggle** (the default) to control a device, or **[Weather](/card-types/weather)** to show the current weather condition.
+1. **Choose a type** — **[Button](/card-types/buttons)** to trigger Home Assistant automations with a single tap, **[Cover](/card-types/covers)** to control blinds and shutters, **[Date](/card-types/calendar)** to show today's date, **[Sensor](/card-types/sensors)** to display a live numeric reading or text state, **[Slider](/card-types/sliders)** to control light brightness, **Subpage** to create a folder of extra cards, **Toggle** (the default) to control a device, or **[Weather](/card-types/weather)** to show the current weather condition.
 2. **Pick the device** you want to control by entering its Home Assistant entity name (for example, `light.living_room` or `switch.garden_lights`). You can find these under **Settings > Devices & Services** in Home Assistant. Subpage buttons don't need a device name.
 3. **Choose an icon** — type to search, or select **Auto** to let the panel pick one based on the device type.
 4. **Set a label** (optional). If left blank the button uses the device's friendly name from Home Assistant.
 
 **[Button](/card-types/buttons)** — a momentary button that fires an event to Home Assistant for use as an automation trigger. 
 
-**[Calendar](/card-types/calendar)** — displays today's day number with the month underneath.
-
 **[Cover](/card-types/covers)** — controls blinds, shutters, and garage doors with a position slider. 
+
+**[Date](/card-types/calendar)** — displays today's day number with the month underneath.
 
 **[Sensor](/card-types/sensors)** — displays a live reading from a Home Assistant sensor entity. Use the mode tabs to choose **Numeric** or **Text**.
 

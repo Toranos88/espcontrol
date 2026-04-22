@@ -176,8 +176,8 @@ export default defineConfig({
         text: 'Card Types',
         items: [
           { text: 'Buttons', link: '/card-types/buttons' },
-          { text: 'Calendar', link: '/card-types/calendar' },
           { text: 'Covers', link: '/card-types/covers' },
+          { text: 'Date', link: '/card-types/calendar' },
           { text: 'Sensors', link: '/card-types/sensors' },
           { text: 'Sliders', link: '/card-types/sliders' },
           { text: 'Weather', link: '/card-types/weather' },

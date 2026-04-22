@@ -1,18 +1,18 @@
 ---
-title: Calendar
+title: Date
 description:
   How to show today's date on your Espcontrol panel.
 ---
 
-# Calendar
+# Date
 
-A calendar card shows the current date from the panel clock. It uses the same layout as a numeric sensor card: the day number is shown large, and the month is shown as the label underneath.
+A date card shows the current date from the panel clock. It uses the same layout as a numeric sensor card: the day number is shown large, and the month is shown as the label underneath.
 
-Calendar cards are read-only — tapping them does nothing.
+Date cards are read-only — tapping them does nothing.
 
-## Setting Up a Calendar Card
+## Setting Up a Date Card
 
-1. Select a card and change its type to **Calendar**.
+1. Select a card and change its type to **Date**.
 2. Apply the configuration so the panel restarts with the new card.
 
 ## How It Works on the Panel

@@ -1,6 +1,6 @@
-// Read-only calendar card: displays the current day number with the month label.
+// Read-only date card: displays the current day number with the month label.
 registerButtonType("calendar", {
-  label: "Calendar",
+  label: "Date",
   allowInSubpage: true,
   hideLabel: true,
   onSelect: function (b) {
