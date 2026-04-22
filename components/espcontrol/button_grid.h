@@ -415,6 +415,10 @@ inline std::string garage_state_label(const std::string &state) {
   return sentence_cap_text(state);
 }
 
+inline bool garage_label_mode(const std::string &sensor) {
+  return sensor == "label";
+}
+
 inline bool garage_state_is_active(const std::string &state) {
   return state == "open" || state == "opening" || state == "closing";
 }
@@ -718,7 +722,11 @@ inline void setup_weather_card(BtnSlot &s, bool has_sensor_color, uint32_t senso
 
 inline void setup_garage_card(BtnSlot &s, const ParsedCfg &p) {
   lv_label_set_text(s.icon_lbl, garage_closed_icon(p.icon));
-  lv_label_set_text(s.text_lbl, "--");
+  if (garage_label_mode(p.sensor)) {
+    lv_label_set_text(s.text_lbl, p.label.empty() ? "Garage Door" : p.label.c_str());
+  } else {
+    lv_label_set_text(s.text_lbl, "--");
+  }
 }
 
 inline void apply_push_button_transition(lv_obj_t *btn) {
@@ -839,17 +847,19 @@ inline void subscribe_weather_state(lv_obj_t *icon_lbl, lv_obj_t *text_lbl, cons
 
 inline void subscribe_garage_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl, lv_obj_t *text_lbl,
                                    const char *closed_icon, const char *open_icon,
-                                   const std::string &entity_id) {
+                                   const std::string &entity_id, bool show_state_label) {
   esphome::api::global_api_server->subscribe_home_assistant_state(
     entity_id, {},
     std::function<void(const std::string &)>(
-      [btn_ptr, icon_lbl, text_lbl, closed_icon, open_icon](const std::string &state) {
+      [btn_ptr, icon_lbl, text_lbl, closed_icon, open_icon, show_state_label](const std::string &state) {
         bool active = garage_state_is_active(state);
         if (active) lv_obj_add_state(btn_ptr, LV_STATE_CHECKED);
         else lv_obj_clear_state(btn_ptr, LV_STATE_CHECKED);
         lv_label_set_text(icon_lbl, garage_state_uses_open_icon(state) ? open_icon : closed_icon);
-        std::string label = garage_state_label(state);
-        lv_label_set_text(text_lbl, label.c_str());
+        if (show_state_label) {
+          std::string label = garage_state_label(state);
+          lv_label_set_text(text_lbl, label.c_str());
+        }
       })
   );
 }
@@ -1652,9 +1662,13 @@ inline void grid_phase2(
       continue;
     }
     if (p.type == "garage") {
-      if (!p.entity.empty())
+      if (!p.entity.empty()) {
+        bool label_mode = garage_label_mode(p.sensor);
         subscribe_garage_state(s.btn, s.icon_lbl, s.text_lbl,
-          garage_closed_icon(p.icon), garage_open_icon(p.icon_on), p.entity);
+          garage_closed_icon(p.icon), garage_open_icon(p.icon_on), p.entity, !label_mode);
+        if (label_mode && p.label.empty())
+          subscribe_friendly_name(s.text_lbl, p.entity);
+      }
       continue;
     }
     if (p.type == "internal") {
@@ -1939,10 +1953,17 @@ inline void grid_phase2(
 
       } else if (sb.type == "garage") {
         lv_label_set_text(sil, garage_closed_icon(sb.icon));
-        lv_label_set_text(stl, "--");
+        bool label_mode = garage_label_mode(sb.sensor);
+        if (label_mode) {
+          lv_label_set_text(stl, sb.label.empty() ? "Garage Door" : sb.label.c_str());
+        } else {
+          lv_label_set_text(stl, "--");
+        }
         if (!sb.entity.empty()) {
           subscribe_garage_state(sb_btn, sil, stl,
-            garage_closed_icon(sb.icon), garage_open_icon(sb.icon_on), sb.entity);
+            garage_closed_icon(sb.icon), garage_open_icon(sb.icon_on), sb.entity, !label_mode);
+          if (label_mode && sb.label.empty())
+            subscribe_friendly_name(stl, sb.entity);
 
           if (sp_indicator) {
             lv_obj_t *parent_btn = slots[si].btn;

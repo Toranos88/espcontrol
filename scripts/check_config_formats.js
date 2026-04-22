@@ -184,6 +184,17 @@ assertButtonRoundTrip(hooks, "internal relay push button", {
   precision: "",
 }, false);
 
+assertButtonRoundTrip(hooks, "garage label button", {
+  entity: "cover.garage",
+  label: "Garage Door",
+  icon: "Garage",
+  icon_on: "Garage Open",
+  sensor: "label",
+  unit: "",
+  type: "garage",
+  precision: "",
+}, false);
+
 assert.deepStrictEqual(buttonShape(hooks.parseButtonConfig("light.legacy;Legacy;Auto;Lightbulb;sensor.legacy;W;sensor;1")), {
   entity: "light.legacy",
   label: "Legacy",
@@ -259,6 +270,13 @@ assert.deepStrictEqual(subpageShape(hooks.parseSubpageConfig("~1,B|R,cover.garag
     buttonShape({ entity: "cover.garage", icon: "Garage", icon_on: "Garage Open", type: "garage" }),
   ],
 }, "compact garage subpage parse");
+
+assert.deepStrictEqual(subpageShape(hooks.parseSubpageConfig("~1,B|R,cover.garage,Garage%20Door,Garage,Garage%20Open,label")), {
+  order: ["1", "B"],
+  buttons: [
+    buttonShape({ entity: "cover.garage", label: "Garage Door", icon: "Garage", icon_on: "Garage Open", sensor: "label", type: "garage" }),
+  ],
+}, "compact garage label subpage parse");
 
 assert.deepStrictEqual(subpageShape(hooks.parseSubpageConfig("~1,B|I,relay_2,Gate,Power%20Plug,Power,push")), {
   order: ["1", "B"],
