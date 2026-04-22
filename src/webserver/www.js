@@ -2153,10 +2153,7 @@
     tzSelect.id = "sp-set-timezone";
     if (state.timezoneOptions.length) {
       state.timezoneOptions.forEach(function (opt) {
-        var o = document.createElement("option");
-        o.value = opt;
-        o.textContent = opt;
-        tzSelect.appendChild(o);
+        appendTimezoneOption(tzSelect, opt);
       });
     }
     tzSelect.value = state.timezone;
@@ -4956,6 +4953,58 @@
     return idx > 0 ? tz.substring(0, idx) : tz;
   }
 
+  function formatGmtOffset(minutes) {
+    var sign = minutes >= 0 ? "+" : "-";
+    var abs = Math.abs(minutes);
+    var h = Math.floor(abs / 60);
+    var m = abs % 60;
+    return "GMT" + sign + h + (m ? ":" + String(m).padStart(2, "0") : "");
+  }
+
+  function timezoneOffsetMinutes(tzId, date) {
+    try {
+      var parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: tzId,
+        hourCycle: "h23",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      }).formatToParts(date);
+      var values = {};
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i].type !== "literal") values[parts[i].type] = parts[i].value;
+      }
+      var localAsUtc = Date.UTC(
+        Number(values.year),
+        Number(values.month) - 1,
+        Number(values.day),
+        Number(values.hour),
+        Number(values.minute),
+        Number(values.second)
+      );
+      return Math.round((localAsUtc - date.getTime()) / 60000);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function formatTimezoneOption(opt) {
+    var tzId = getTzId(opt);
+    var offset = timezoneOffsetMinutes(tzId, new Date());
+    if (offset == null || !isFinite(offset)) return opt;
+    return tzId + " (" + formatGmtOffset(offset) + " now)";
+  }
+
+  function appendTimezoneOption(select, opt) {
+    var o = document.createElement("option");
+    o.value = opt;
+    o.textContent = formatTimezoneOption(opt);
+    select.appendChild(o);
+  }
+
   function updateClock() {
     if (!els.clock) return;
     var now = new Date();
@@ -5176,10 +5225,7 @@
           if (els.setTimezone) {
             els.setTimezone.innerHTML = "";
             d.option.forEach(function (opt) {
-              var o = document.createElement("option");
-              o.value = opt;
-              o.textContent = opt;
-              els.setTimezone.appendChild(o);
+              appendTimezoneOption(els.setTimezone, opt);
             });
           }
         }

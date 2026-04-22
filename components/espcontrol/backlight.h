@@ -29,8 +29,8 @@ inline SunCalcResult recalc_sunrise_sunset(
     const std::string &tz_option, bool use_12h = true) {
   SunCalcResult r = {};
 
-  std::string tz_id = tz_option.substr(0, tz_option.find(" ("));
-  float tz_offset = current_utc_offset_hours();
+  std::string tz_id = timezone_id_from_option(tz_option);
+  float tz_offset = utc_offset_hours_for_date(year, month, day, tz_option);
 
   float lat, lon;
   if (!lookup_tz_coords(tz_id, lat, lon)) {

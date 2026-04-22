@@ -10,7 +10,8 @@ esphome:
     priority: -100
     then:
       - lambda: |-
-          apply_timezone(id(timezone_select).current_option());
+          const char *posix = apply_timezone(id(timezone_select).current_option());
+          id(ha_time).set_timezone(posix);
 
 # ---------------------------------------------------------------------------
 # Timezone selector (drives sunrise/sunset calculation via sun_calc.h)
@@ -162,7 +163,8 @@ select:
     on_value:
       then:
         - lambda: |-
-            apply_timezone(id(timezone_select).current_option());
+            const char *posix = apply_timezone(id(timezone_select).current_option());
+            id(ha_time).set_timezone(posix);
         - script.execute: time_update
         - script.execute: backlight_recalc_sunrise_sunset
         - script.execute: screen_schedule_check
@@ -208,7 +210,8 @@ script:
   - id: time_update
     then:
       - lambda: |-
-          apply_timezone(id(timezone_select).current_option());
+          const char *posix = apply_timezone(id(timezone_select).current_option());
+          id(ha_time).set_timezone(posix);
       - lvgl.label.update:
           id: display_time
           text: !lambda |-

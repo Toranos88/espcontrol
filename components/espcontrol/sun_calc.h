@@ -12,6 +12,8 @@
 // strings for DST-aware local time via setenv("TZ")/tzset().
 
 struct TzCoord { const char* tz; float lat; float lon; const char* posix_tz; };
+struct TzUtcPoint { int year; int month; int day; int hour; int minute; };
+struct TzUtcRange { TzUtcPoint start; TzUtcPoint end; };
 
 static const TzCoord TZ_COORDS[] = {
   {"Pacific/Midway",                    28.21f, -177.38f, "SST11"},
@@ -111,7 +113,7 @@ static const TzCoord TZ_COORDS[] = {
   {"Asia/Colombo",                       6.93f,   79.84f, "<+0530>-5:30"},
   {"Asia/Kathmandu",                    27.72f,   85.32f, "<+0545>-5:45"},
   {"Asia/Dhaka",                        23.81f,   90.41f, "<+06>-6"},
-  {"Asia/Almaty",                       43.24f,   76.95f, "<+06>-6"},
+  {"Asia/Almaty",                       43.24f,   76.95f, "<+05>-5"},
   {"Asia/Rangoon",                      16.87f,   96.20f, "<+0630>-6:30"},
   {"Asia/Bangkok",                      13.76f,  100.50f, "<+07>-7"},
   {"Asia/Jakarta",                      -6.21f,  106.85f, "WIB-7"},
@@ -148,6 +150,47 @@ static const TzCoord TZ_COORDS[] = {
 
 static constexpr int TZ_COORDS_COUNT = sizeof(TZ_COORDS) / sizeof(TZ_COORDS[0]);
 
+// Morocco pauses UTC+1 during Ramadan. POSIX TZ strings cannot represent these
+// lunar-calendar transitions, so keep the known UTC transition windows explicit.
+static const TzUtcRange CASABLANCA_UTC_PAUSES[] = {
+  {{2024, 3, 10, 2, 0}, {2024, 4, 14, 2, 0}},
+  {{2025, 2, 23, 2, 0}, {2025, 4, 6, 2, 0}},
+  {{2026, 2, 15, 2, 0}, {2026, 3, 22, 2, 0}},
+  {{2027, 2, 7, 2, 0}, {2027, 3, 14, 2, 0}},
+  {{2028, 1, 23, 2, 0}, {2028, 3, 5, 2, 0}},
+  {{2029, 1, 14, 2, 0}, {2029, 2, 18, 2, 0}},
+  {{2029, 12, 30, 2, 0}, {2030, 2, 10, 2, 0}},
+  {{2030, 12, 22, 2, 0}, {2031, 1, 26, 2, 0}},
+  {{2031, 12, 14, 2, 0}, {2032, 1, 18, 2, 0}},
+  {{2032, 11, 28, 2, 0}, {2033, 1, 9, 2, 0}},
+  {{2033, 11, 20, 2, 0}, {2033, 12, 25, 2, 0}},
+  {{2034, 11, 5, 2, 0}, {2034, 12, 17, 2, 0}},
+  {{2035, 10, 28, 2, 0}, {2035, 12, 9, 2, 0}},
+  {{2036, 10, 19, 2, 0}, {2036, 11, 23, 2, 0}},
+  {{2037, 10, 4, 2, 0}, {2037, 11, 15, 2, 0}},
+  {{2038, 9, 26, 2, 0}, {2038, 10, 31, 2, 0}},
+  {{2039, 9, 18, 2, 0}, {2039, 10, 23, 2, 0}},
+  {{2040, 9, 2, 2, 0}, {2040, 10, 14, 2, 0}},
+  {{2041, 8, 25, 2, 0}, {2041, 9, 29, 2, 0}},
+  {{2042, 8, 10, 2, 0}, {2042, 9, 21, 2, 0}},
+  {{2043, 8, 2, 2, 0}, {2043, 9, 13, 2, 0}},
+  {{2044, 7, 24, 2, 0}, {2044, 8, 28, 2, 0}},
+  {{2045, 7, 9, 2, 0}, {2045, 8, 20, 2, 0}},
+  {{2046, 7, 1, 2, 0}, {2046, 8, 5, 2, 0}},
+  {{2047, 6, 23, 2, 0}, {2047, 7, 28, 2, 0}},
+  {{2048, 6, 7, 2, 0}, {2048, 7, 19, 2, 0}},
+  {{2049, 5, 30, 2, 0}, {2049, 7, 4, 2, 0}},
+  {{2050, 5, 15, 2, 0}, {2050, 6, 26, 2, 0}},
+};
+
+static constexpr int CASABLANCA_UTC_PAUSE_COUNT =
+    sizeof(CASABLANCA_UTC_PAUSES) / sizeof(CASABLANCA_UTC_PAUSES[0]);
+
+inline std::string timezone_id_from_option(const std::string &tz_option) {
+  size_t idx = tz_option.find(" (");
+  return idx == std::string::npos ? tz_option : tz_option.substr(0, idx);
+}
+
 inline bool lookup_tz_coords(const std::string &tz_id, float &lat, float &lon) {
   for (int i = 0; i < TZ_COORDS_COUNT; i++) {
     if (tz_id == TZ_COORDS[i].tz) {
@@ -167,15 +210,52 @@ inline const char* lookup_posix_tz(const std::string &tz_id) {
   return "UTC0";
 }
 
-inline void apply_timezone(const std::string &tz_option) {
-  std::string tz_id = tz_option.substr(0, tz_option.find(" ("));
-  const char* posix = lookup_posix_tz(tz_id);
-  setenv("TZ", posix, 1);
-  tzset();
+inline int compare_utc_point(const TzUtcPoint &a, const TzUtcPoint &b) {
+  if (a.year != b.year) return a.year < b.year ? -1 : 1;
+  if (a.month != b.month) return a.month < b.month ? -1 : 1;
+  if (a.day != b.day) return a.day < b.day ? -1 : 1;
+  if (a.hour != b.hour) return a.hour < b.hour ? -1 : 1;
+  if (a.minute != b.minute) return a.minute < b.minute ? -1 : 1;
+  return 0;
 }
 
-inline float current_utc_offset_hours() {
+inline TzUtcPoint utc_point_from_tm(const struct tm &tm) {
+  return {tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min};
+}
+
+inline bool casablanca_pause_at_utc(const TzUtcPoint &utc_point) {
+  for (int i = 0; i < CASABLANCA_UTC_PAUSE_COUNT; i++) {
+    const auto &range = CASABLANCA_UTC_PAUSES[i];
+    if (compare_utc_point(utc_point, range.start) >= 0 &&
+        compare_utc_point(utc_point, range.end) < 0)
+      return true;
+  }
+  return false;
+}
+
+inline const char* resolve_posix_tz_at_utc(
+    const std::string &tz_id, const TzUtcPoint &utc_point) {
+  if (tz_id == "Africa/Casablanca" && casablanca_pause_at_utc(utc_point))
+    return "GMT0";
+  return lookup_posix_tz(tz_id);
+}
+
+inline const char* current_posix_tz(const std::string &tz_id) {
   time_t t = time(nullptr);
+  struct tm utc_tm;
+  gmtime_r(&t, &utc_tm);
+  return resolve_posix_tz_at_utc(tz_id, utc_point_from_tm(utc_tm));
+}
+
+inline const char* apply_timezone(const std::string &tz_option) {
+  std::string tz_id = timezone_id_from_option(tz_option);
+  const char* posix = current_posix_tz(tz_id);
+  setenv("TZ", posix, 1);
+  tzset();
+  return posix;
+}
+
+inline float utc_offset_hours_at(time_t t) {
   struct tm utc_tm, local_tm;
   gmtime_r(&t, &utc_tm);
   localtime_r(&t, &local_tm);
@@ -186,6 +266,35 @@ inline float current_utc_offset_hours() {
   else if (day_diff < -1) day_diff = 1;
   diff_min += day_diff * 1440;
   return diff_min / 60.0f;
+}
+
+inline float current_utc_offset_hours() {
+  return utc_offset_hours_at(time(nullptr));
+}
+
+inline float utc_offset_hours_for_date(
+    int year, int month, int day, const std::string &tz_option) {
+  std::string tz_id = timezone_id_from_option(tz_option);
+  setenv("TZ", lookup_posix_tz(tz_id), 1);
+  tzset();
+
+  struct tm local_noon = {};
+  local_noon.tm_year = year - 1900;
+  local_noon.tm_mon = month - 1;
+  local_noon.tm_mday = day;
+  local_noon.tm_hour = 12;
+  local_noon.tm_isdst = -1;
+  time_t noon_epoch = mktime(&local_noon);
+  float offset = utc_offset_hours_at(noon_epoch);
+
+  if (tz_id == "Africa/Casablanca") {
+    struct tm utc_tm;
+    gmtime_r(&noon_epoch, &utc_tm);
+    offset = casablanca_pause_at_utc(utc_point_from_tm(utc_tm)) ? 0.0f : 1.0f;
+  }
+
+  apply_timezone(tz_option);
+  return offset;
 }
 
 // ============================================================================
@@ -269,4 +378,3 @@ inline bool calc_sunrise_sunset(int year, int month, int day,
 
   return ok_rise && ok_set;
 }
-
