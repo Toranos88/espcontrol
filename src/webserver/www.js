@@ -2041,7 +2041,7 @@
     scheduleModeSelect.className = "sp-select";
     scheduleModeSelect.id = "sp-set-schedule-mode";
     [
-      { value: "screen_off", label: "Screen off" },
+      { value: "screen_off", label: "Screen Off" },
       { value: "always_on", label: "Always On" },
       { value: "clock", label: "Clock" },
     ].forEach(function (opt) {

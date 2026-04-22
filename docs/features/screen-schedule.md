@@ -15,9 +15,9 @@ You will find it in the **Settings** tab on the [Setup](/features/setup) page, u
 - **Schedule Screen Off** - turns automatic screen sleep and wake on or off.
 - **On Time** - the first hour when the screen should be awake. The default is **6:00 AM**.
 - **Off Time** - the first hour when the night schedule starts. The default is **11:00 PM**.
-- **At Off Time** - what the panel should do overnight. **Screen off** is the default, **Always On** keeps the panel usable, and **Clock** shows the clock instead.
-- **When Woken, Idle Time to Screen Off** - shown only for **Screen off**. It controls how long the screen stays awake after you tap it during scheduled-off hours. The default is **1 minute**.
-- **When Woken, Screen Brightness** - shown only for **Screen off**. It controls the brightness used for a temporary wake during scheduled-off hours. The default is **10%**.
+- **At Off Time** - what the panel should do overnight. **Screen Off** is the default, **Always On** keeps the panel usable, and **Clock** shows the clock instead.
+- **When Woken, Idle Time to Screen Off** - shown only for **Screen Off**. It controls how long the screen stays awake after you tap it during scheduled-off hours. The default is **1 minute**.
+- **When Woken, Screen Brightness** - shown only for **Screen Off**. It controls the brightness used for a temporary wake during scheduled-off hours. The default is **10%**.
 - **Clock Brightness** - shown only for **Clock**. It controls the backlight level used by the overnight clock. The default is **10%**.
 
 When the schedule is disabled, the on and off time controls are hidden and the panel uses the normal [screensaver](/features/screensaver) and [backlight](/features/backlight) rules.
@@ -32,10 +32,10 @@ If the on and off times are the same, the schedule is treated as always on.
 
 ## Manual Wake and Sleep
 
-Touching the screen while it is asleep, or while the schedule clock is showing, wakes it without changing the saved schedule. In **Screen off** and **Clock** modes, a temporary wake outside the scheduled hours uses the saved wake brightness, stays awake for the saved wake idle time, then returns to the selected night mode.
+Touching the screen while it is asleep, or while the schedule clock is showing, wakes it without changing the saved schedule. In **Screen Off** and **Clock** modes, a temporary wake outside the scheduled hours uses the saved wake brightness, stays awake for the saved wake idle time, then returns to the selected night mode.
 
 Pressing and holding a button on the touchscreen for 3 seconds puts the screen to sleep manually. This is stronger than the schedule, so it will not immediately wake again just because the current time is inside the scheduled-on window. Tap the screen to wake it.
 
 ## Brightness
 
-Screen schedule works alongside the daytime and nighttime brightness settings. When the screen is awake during scheduled-on hours, brightness still follows sunrise and sunset for your selected timezone. **Always On** uses those normal brightness rules overnight too. **Screen off** turns the physical backlight off, while **Clock** uses its own clock brightness setting.
+Screen schedule works alongside the daytime and nighttime brightness settings. When the screen is awake during scheduled-on hours, brightness still follows sunrise and sunset for your selected timezone. **Always On** uses those normal brightness rules overnight too. **Screen Off** turns the physical backlight off, while **Clock** uses its own clock brightness setting.
