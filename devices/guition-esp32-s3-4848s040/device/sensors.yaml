@@ -102,6 +102,7 @@ esphome:
               id(button_off_color).state,
               id(sensor_card_color).state,
               id(main_page)->obj);
+        - script.execute: time_update
         - delay: 100ms
 
         # Phase 3: Temperature + presence subscriptions

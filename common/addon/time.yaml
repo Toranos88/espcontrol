@@ -227,3 +227,6 @@ script:
               snprintf(time_buf, sizeof(time_buf), "%02d:%02d", h, m);
             }
             return time_buf;
+      - lambda: |-
+          auto now = id(ha_time).now();
+          update_calendar_cards(now.is_valid(), now.day_of_month, now.month);

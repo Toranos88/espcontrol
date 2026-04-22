@@ -325,6 +325,75 @@ inline void setup_sensor_card(BtnSlot &s, const ParsedCfg &p,
   }
 }
 
+struct CalendarCardRef {
+  lv_obj_t *day_lbl;
+  lv_obj_t *month_lbl;
+};
+
+inline CalendarCardRef *calendar_card_refs() {
+  static CalendarCardRef refs[MAX_GRID_SLOTS + MAX_SUBPAGE_ITEMS];
+  return refs;
+}
+
+inline int &calendar_card_count() {
+  static int count = 0;
+  return count;
+}
+
+inline void reset_calendar_cards() {
+  calendar_card_count() = 0;
+}
+
+inline void register_calendar_card(lv_obj_t *day_lbl, lv_obj_t *month_lbl) {
+  int &count = calendar_card_count();
+  if (count >= MAX_GRID_SLOTS + MAX_SUBPAGE_ITEMS) {
+    ESP_LOGW("calendar", "Too many calendar cards; skipping date updates");
+    return;
+  }
+  calendar_card_refs()[count++] = {day_lbl, month_lbl};
+}
+
+inline const char *calendar_month_name(int month) {
+  static const char *months[] = {
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  };
+  if (month < 1 || month > 12) return "Date";
+  return months[month - 1];
+}
+
+inline void update_calendar_cards(bool valid, int day, int month) {
+  char day_buf[4];
+  const char *day_text = "--";
+  const char *month_text = "Date";
+  if (valid && day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+    snprintf(day_buf, sizeof(day_buf), "%d", day);
+    day_text = day_buf;
+    month_text = calendar_month_name(month);
+  }
+
+  CalendarCardRef *refs = calendar_card_refs();
+  int count = calendar_card_count();
+  for (int i = 0; i < count; i++) {
+    if (refs[i].day_lbl) lv_label_set_text(refs[i].day_lbl, day_text);
+    if (refs[i].month_lbl) lv_label_set_text(refs[i].month_lbl, month_text);
+  }
+}
+
+inline void setup_calendar_card(BtnSlot &s, bool has_sensor_color, uint32_t sensor_val) {
+  if (has_sensor_color) {
+    lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
+      static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+  }
+  lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
+  lv_label_set_text(s.sensor_lbl, "--");
+  lv_label_set_text(s.unit_lbl, "");
+  lv_label_set_text(s.text_lbl, "Date");
+  register_calendar_card(s.sensor_lbl, s.text_lbl);
+}
+
 inline void setup_weather_card(BtnSlot &s, bool has_sensor_color, uint32_t sensor_val) {
   if (has_sensor_color) {
     lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
@@ -545,7 +614,7 @@ inline void send_slider_action(const std::string &entity_id, int value) {
 inline void handle_button_click(const std::string &cfg, int slot_num,
                                 lv_obj_t *btn_obj) {
   ParsedCfg p = parse_cfg(cfg);
-  if (p.type == "sensor" || p.type == "text_sensor") return;
+  if (p.type == "sensor" || p.type == "text_sensor" || p.type == "calendar") return;
   if (p.type == "push") {
     std::string label = p.label;
     if (label.empty()) {
@@ -787,6 +856,7 @@ inline std::vector<std::string> split_subpage_fields(const std::string &value, c
 }
 
 inline std::string compact_subpage_type(const std::string &code) {
+  if (code == "D") return "calendar";
   if (code == "S") return "sensor";
   if (code == "W") return "weather";
   if (code == "L") return "slider";
@@ -1042,6 +1112,8 @@ inline void grid_phase1(
     if (has_sensor_color) sensor_val = correct_color(sensor_val);
   }
 
+  reset_calendar_cards();
+
   for (int i = 0; i < NS; i++)
     lv_obj_add_flag(slots[i].btn, LV_OBJ_FLAG_HIDDEN);
 
@@ -1073,6 +1145,10 @@ inline void grid_phase1(
     if (p.type == "sensor") {
       if (p.sensor.empty()) continue;
       setup_sensor_card(s, p, has_sensor_color, sensor_val);
+      continue;
+    }
+    if (p.type == "calendar") {
+      setup_calendar_card(s, has_sensor_color, sensor_val);
       continue;
     }
     if (p.type == "weather") {
@@ -1158,6 +1234,9 @@ inline void grid_phase2(
       subscribe_sensor_value(s.sensor_lbl, p.sensor, parse_precision(p.precision));
       if (p.label.empty())
         subscribe_friendly_name(s.text_lbl, p.sensor);
+      continue;
+    }
+    if (p.type == "calendar") {
       continue;
     }
     if (p.type == "weather") {
@@ -1391,6 +1470,39 @@ inline void grid_phase2(
         } else {
           subscribe_friendly_name(stl, sb.sensor);
         }
+
+      } else if (sb.type == "calendar") {
+        if (has_sensor_color)
+          lv_obj_set_style_bg_color(sb_btn, lv_color_hex(sensor_val),
+            static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+        lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_flag(sil, LV_OBJ_FLAG_HIDDEN);
+
+        lv_obj_t *sc = lv_obj_create(sb_btn);
+        lv_obj_set_align(sc, LV_ALIGN_TOP_LEFT);
+        lv_obj_set_size(sc, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+        lv_obj_clear_flag(sc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_clear_flag(sc, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_bg_opa(sc, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_style_border_width(sc, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(sc, 0, LV_PART_MAIN);
+        lv_obj_set_layout(sc, LV_LAYOUT_FLEX);
+        lv_obj_set_style_flex_flow(sc, LV_FLEX_FLOW_ROW, LV_PART_MAIN);
+        lv_obj_set_style_flex_cross_place(sc, LV_FLEX_ALIGN_END, LV_PART_MAIN);
+
+        lv_obj_t *svl = lv_label_create(sc);
+        lv_obj_set_style_text_font(svl, cfg.sp_sensor_font, LV_PART_MAIN);
+        lv_obj_set_style_text_color(svl, sp_txt_color, LV_PART_MAIN);
+        lv_label_set_text(svl, "--");
+
+        lv_obj_t *sul = lv_label_create(sc);
+        lv_obj_set_style_text_font(sul, sp_btn_fnt, LV_PART_MAIN);
+        lv_obj_set_style_text_color(sul, sp_txt_color, LV_PART_MAIN);
+        lv_obj_set_style_pad_bottom(sul, 6, LV_PART_MAIN);
+        lv_label_set_text(sul, "");
+
+        lv_label_set_text(stl, "Date");
+        register_calendar_card(svl, stl);
 
       } else if (sb.type == "weather") {
         if (has_sensor_color)

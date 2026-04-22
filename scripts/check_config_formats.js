@@ -48,6 +48,7 @@ function decodeField(value) {
 
 function subpageTypeFromCode(code) {
   return {
+    D: "calendar",
     S: "sensor",
     W: "weather",
     L: "slider",
@@ -204,7 +205,7 @@ assertSubpageRoundTrip(hooks, "normal subpage", {
   order: ["1", "B", "2"],
   buttons: [
     buttonShape({ entity: "light.kitchen", label: "Kitchen", icon: "Auto", icon_on: "Lightbulb" }),
-    buttonShape({ entity: "sensor.room", label: "Room", icon: "Thermometer", icon_on: "Auto", sensor: "sensor.room", unit: "deg C", type: "sensor", precision: "1" }),
+    buttonShape({ type: "calendar" }),
   ],
 }, true);
 
@@ -223,6 +224,13 @@ assert.deepStrictEqual(subpageShape(hooks.parseSubpageConfig("~1,B,2|L,light.str
     buttonShape({ entity: "sensor.temp", label: "Temp", icon: "Thermometer", icon_on: "Auto", sensor: "sensor.temp", unit: "deg C", type: "sensor", precision: "1" }),
   ],
 }, "compact subpage parse");
+
+assert.deepStrictEqual(subpageShape(hooks.parseSubpageConfig("~1,B|D")), {
+  order: ["1", "B"],
+  buttons: [
+    buttonShape({ type: "calendar" }),
+  ],
+}, "compact calendar subpage parse");
 
 const largeSubpage = {
   order: Array.from({ length: 25 }, (_, i) => (i === 4 ? "B" : String(i + 1))),
