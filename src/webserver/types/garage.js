@@ -17,6 +17,14 @@ registerButtonType("garage", {
       helpers.saveField("sensor", "");
     }
 
+    var lf = document.createElement("div");
+    lf.className = "sp-field";
+    lf.appendChild(helpers.fieldLabel("Label", helpers.idPrefix + "label"));
+    var labelInp = helpers.textInput(helpers.idPrefix + "label", b.label, "e.g. Garage Door");
+    lf.appendChild(labelInp);
+    panel.appendChild(lf);
+    helpers.bindField(labelInp, "label", true);
+
     function iconField(label, inputSuffix, field, currentVal, defaultVal) {
       var section = document.createElement("div");
       section.className = "sp-field";
@@ -49,14 +57,6 @@ registerButtonType("garage", {
     var iconOnVal = b.icon_on && b.icon_on !== "Auto" ? b.icon_on : "Garage Open";
     panel.appendChild(iconField("Closed Icon", "icon", "icon", closedIconVal, "Garage"));
     panel.appendChild(iconField("Open Icon", "icon-on", "icon_on", iconOnVal, "Garage Open"));
-
-    var lf = document.createElement("div");
-    lf.className = "sp-field";
-    lf.appendChild(helpers.fieldLabel("Label", helpers.idPrefix + "label"));
-    var labelInp = helpers.textInput(helpers.idPrefix + "label", b.label, "e.g. Garage Door");
-    lf.appendChild(labelInp);
-    panel.appendChild(lf);
-    helpers.bindField(labelInp, "label", true);
   },
   renderPreview: function (b, helpers) {
     var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : "garage";
