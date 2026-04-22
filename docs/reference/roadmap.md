@@ -8,17 +8,17 @@ description:
 
 Espcontrol is actively developed and improved based on user feedback. There is no fixed public roadmap — features and priorities evolve based on what users need and what Home Assistant and the hardware support.
 
-## Additional Button Types
+## Additional Card Types
 
-In addition to the existing card types — **[Button](/card-types/buttons)**, **[Cover](/card-types/covers)**, **[Date](/card-types/calendar)**, **[Garage Door](/card-types/garage-doors)**, **[Sensor](/card-types/sensors)**, **[Slider](/card-types/sliders)**, **Subpage**, **Toggle**, and **[Weather](/card-types/weather)** — future releases will introduce more specialised controls:
+In addition to the existing card types — **[Trigger](/card-types/buttons)**, **[Cover](/card-types/covers)**, **[Date](/card-types/calendar)**, **[Garage Door](/card-types/garage-doors)**, **[Sensor](/card-types/sensors)**, **[Slider](/card-types/sliders)**, **Subpage**, **Toggle**, and **[Weather](/card-types/weather)** — future releases will introduce more specialised controls:
 
-| Button type | Description |
+| Card type | Description |
 | --- | --- |
 | **Thermostat** | Temperature set-point with up/down adjustment and current reading |
 | **Media player** | Play, pause, skip, and source controls for media devices |
 | **Fan control** | Speed steps or a slider with an optional oscillation toggle |
 
-These are planned directions, not commitments — the order and scope will depend on community feedback. If there's a button type you'd like to see, open a feature request on GitHub.
+These are planned directions, not commitments — the order and scope will depend on community feedback. If there's a card type you'd like to see, open a feature request on GitHub.
 
 ## How to Get Involved
 

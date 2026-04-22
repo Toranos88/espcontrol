@@ -14,20 +14,20 @@ Your Espcontrol panel has a built-in web page where you can set everything up. O
 The address is shown on the display screen when no buttons are configured yet. You can also find it in your router's connected devices list, or in Home Assistant under **Settings > Devices & Services > ESPHome**.
 :::
 
-### Adding a Button
+### Adding a Card
 
-Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A settings panel appears below the preview where you configure the button:
+Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A settings panel appears below the preview where you configure the card:
 
 ![Card settings panel](/images/button-settings.png)
 
 ![Toggle card showing a Heater icon](/images/card-toggle.png)
 
-1. **Choose a type** — **[Button](/card-types/buttons)** to trigger Home Assistant automations with a single tap, **[Cover](/card-types/covers)** to control blinds and shutters, **[Date](/card-types/calendar)** to show today's date, **[Sensor](/card-types/sensors)** to display a live numeric reading or text state, **[Slider](/card-types/sliders)** to control light brightness, **Subpage** to create a folder of extra cards, **Toggle** (the default) to control a device, or **[Weather](/card-types/weather)** to show the current weather condition.
-2. **Pick the device** you want to control by entering its Home Assistant entity name (for example, `light.living_room` or `switch.garden_lights`). You can find these under **Settings > Devices & Services** in Home Assistant. Subpage buttons don't need a device name.
+1. **Choose a type** — **[Trigger](/card-types/buttons)** to start Home Assistant automations with a single tap, **[Cover](/card-types/covers)** to control blinds and shutters, **[Date](/card-types/calendar)** to show today's date, **[Sensor](/card-types/sensors)** to display a live numeric reading or text state, **[Slider](/card-types/sliders)** to control light brightness, **Subpage** to create a folder of extra cards, **Toggle** (the default) to control a device, or **[Weather](/card-types/weather)** to show the current weather condition.
+2. **Pick the device** you want to control by entering its Home Assistant entity name (for example, `light.living_room` or `switch.garden_lights`). You can find these under **Settings > Devices & Services** in Home Assistant. Subpage and trigger cards don't need a device name.
 3. **Choose an icon** — type to search, or select **Auto** to let the panel pick one based on the device type.
-4. **Set a label** (optional). If left blank the button uses the device's friendly name from Home Assistant.
+4. **Set a label** (optional). If left blank the card uses the device's friendly name from Home Assistant.
 
-**[Button](/card-types/buttons)** — a momentary button that fires an event to Home Assistant for use as an automation trigger. 
+**[Trigger](/card-types/buttons)** — a momentary card that fires an event to Home Assistant for use as an automation trigger.
 
 **[Cover](/card-types/covers)** — controls blinds, shutters, and garage doors with a position slider. 
 
@@ -52,13 +52,13 @@ Each toggle button has an optional **When Entity On** setting that changes what 
 
 When the device is off, the button reverts to its normal icon.
 
-### Moving Buttons
+### Moving Cards
 
-Drag and drop any button to reposition it. If you drop it onto an occupied space, the existing button shifts to the next available slot.
+Drag and drop any card to reposition it. If you drop it onto an occupied space, the existing card shifts to the next available slot.
 
-### Double-height Buttons
+### Double-height Cards
 
-Right-click a button and choose **Double Height** to make it span two rows. To revert, right-click and choose **Single Height**. If a button already occupies the space below, it gets moved automatically.
+Right-click a card and choose **Double Height** to make it span two rows. To revert, right-click and choose **Single Height**. If a card already occupies the space below, it gets moved automatically.
 
 ## Apply Configuration
 

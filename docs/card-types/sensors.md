@@ -35,7 +35,7 @@ For **Text** mode:
 ## How It Works on the Panel
 
 - Numeric mode displays the current value in large text, with the unit beside it and the label underneath.
-- Numeric mode uses the **tertiary** colour from [Appearance](/features/appearance), so it remains visually distinct from toggles and buttons.
+- Numeric mode uses the **tertiary** colour from [Appearance](/features/appearance), so it remains visually distinct from toggles and trigger cards.
 - Text mode uses the same tertiary colour as Numeric mode, while keeping the normal toggle-style icon and label layout.
 - Text mode formats states in sentence case. For example, `not_home` displays as `Not home`.
 
