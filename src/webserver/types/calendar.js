@@ -1,4 +1,4 @@
-// Read-only date card: displays the current day number with the month label.
+// Read-only date card: displays either the day/month or local time/date.
 registerButtonType("calendar", {
   label: "Date",
   allowInSubpage: true,
@@ -10,15 +10,69 @@ registerButtonType("calendar", {
     b.icon_on = "Auto";
     b.sensor = "";
     b.unit = "";
-    b.precision = "";
+    b.precision = b.precision === "datetime" ? "datetime" : "";
   },
   renderSettings: function (panel, b, slot, helpers) {
     if (!b.entity) b.entity = "sensor.date";
+    if (b.precision !== "datetime") b.precision = "";
+
+    var displayField = document.createElement("div");
+    displayField.className = "sp-field";
+    displayField.appendChild(helpers.fieldLabel("Display", helpers.idPrefix + "calendar-mode"));
+    var modeSelect = document.createElement("select");
+    modeSelect.className = "sp-select";
+    modeSelect.id = helpers.idPrefix + "calendar-mode";
+
+    [
+      { value: "", label: "Date only" },
+      { value: "datetime", label: "Date & time" }
+    ].forEach(function (optCfg) {
+      var opt = document.createElement("option");
+      opt.value = optCfg.value;
+      opt.textContent = optCfg.label;
+      modeSelect.appendChild(opt);
+    });
+
+    modeSelect.value = b.precision;
+    displayField.appendChild(modeSelect);
+    panel.appendChild(displayField);
+    helpers.bindField(modeSelect, "precision", true);
   },
   renderPreview: function (b, helpers) {
     var now = new Date();
+    var isDateTime = b.precision === "datetime";
     var day = String(now.getDate());
     var month = now.toLocaleString("en", { month: "long" });
+
+    if (isDateTime) {
+      var use12h = typeof state !== "undefined" && state.clockFormat === "12h";
+      var hour = now.getHours();
+      var minute = String(now.getMinutes()).padStart(2, "0");
+      var timeValue = "";
+      var timeUnit = "";
+
+      if (use12h) {
+        var hour12 = hour % 12;
+        if (hour12 === 0) hour12 = 12;
+        timeValue = String(hour12) + ":" + minute;
+        timeUnit = hour < 12 ? "am" : "pm";
+      } else {
+        timeValue = String(hour).padStart(2, "0") + ":" + minute;
+      }
+
+      return {
+        iconHtml:
+          '<span class="sp-sensor-preview">' +
+            '<span class="sp-sensor-value">' + helpers.escHtml(timeValue) + '</span>' +
+            '<span class="sp-sensor-unit">' + helpers.escHtml(timeUnit) + '</span>' +
+          '</span>',
+        labelHtml:
+          '<span class="sp-btn-label-row"><span class="sp-btn-label">' +
+            helpers.escHtml(day + " " + month) +
+          '</span><span class="sp-type-badge mdi mdi-calendar-month"></span></span>',
+      };
+    }
+
     return {
       iconHtml:
         '<span class="sp-sensor-preview">' +

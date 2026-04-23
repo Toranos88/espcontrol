@@ -622,8 +622,10 @@ inline void setup_sensor_card(BtnSlot &s, const ParsedCfg &p,
 }
 
 struct CalendarCardRef {
-  lv_obj_t *day_lbl;
-  lv_obj_t *month_lbl;
+  lv_obj_t *value_lbl;
+  lv_obj_t *unit_lbl;
+  lv_obj_t *label_lbl;
+  bool show_time;
 };
 
 inline CalendarCardRef *calendar_card_refs() {
@@ -637,36 +639,45 @@ inline int &calendar_card_count() {
 }
 
 struct CalendarDateState {
-  bool valid;
+  bool date_valid;
   int day;
   int month;
+  bool time_valid;
+  int hour;
+  int minute;
+  bool use_12h;
 };
 
 inline CalendarDateState &calendar_date_state() {
-  static CalendarDateState state = {false, 0, 0};
+  static CalendarDateState state = {false, 0, 0, false, 0, 0, false};
   return state;
 }
 
 inline bool calendar_date_valid() {
-  return calendar_date_state().valid;
+  return calendar_date_state().date_valid;
 }
 
-inline void apply_calendar_card_text(lv_obj_t *day_lbl, lv_obj_t *month_lbl,
-                                     bool valid, int day, int month);
+inline bool calendar_card_shows_time(const ParsedCfg &p) {
+  return p.precision == "datetime";
+}
+
+inline void apply_calendar_card_text(const CalendarCardRef &ref,
+                                     const CalendarDateState &state);
 
 inline void reset_calendar_cards() {
   calendar_card_count() = 0;
 }
 
-inline void register_calendar_card(lv_obj_t *day_lbl, lv_obj_t *month_lbl) {
+inline void register_calendar_card(lv_obj_t *value_lbl, lv_obj_t *unit_lbl,
+                                   lv_obj_t *label_lbl, bool show_time) {
   int &count = calendar_card_count();
   if (count >= MAX_GRID_SLOTS + MAX_SUBPAGE_ITEMS) {
     ESP_LOGW("calendar", "Too many calendar cards; skipping date updates");
     return;
   }
-  calendar_card_refs()[count++] = {day_lbl, month_lbl};
+  calendar_card_refs()[count++] = {value_lbl, unit_lbl, label_lbl, show_time};
   CalendarDateState &state = calendar_date_state();
-  apply_calendar_card_text(day_lbl, month_lbl, state.valid, state.day, state.month);
+  apply_calendar_card_text(calendar_card_refs()[count - 1], state);
 }
 
 inline const char *calendar_month_name(int month) {
@@ -678,31 +689,83 @@ inline const char *calendar_month_name(int month) {
   return months[month - 1];
 }
 
-inline void apply_calendar_card_text(lv_obj_t *day_lbl, lv_obj_t *month_lbl,
-                                     bool valid, int day, int month) {
-  char day_buf[4];
-  const char *day_text = "--";
-  const char *month_text = "Date";
-  if (valid && day >= 1 && day <= 31 && month >= 1 && month <= 12) {
-    snprintf(day_buf, sizeof(day_buf), "%d", day);
-    day_text = day_buf;
-    month_text = calendar_month_name(month);
+inline void apply_calendar_card_text(const CalendarCardRef &ref,
+                                     const CalendarDateState &state) {
+  char value_buf[8];
+  char label_buf[32];
+  const char *value_text = "--";
+  const char *unit_text = "";
+  const char *label_text = "Date";
+
+  if (ref.show_time) {
+    if (state.time_valid &&
+        state.day >= 1 && state.day <= 31 &&
+        state.month >= 1 && state.month <= 12 &&
+        state.hour >= 0 && state.hour <= 23 &&
+        state.minute >= 0 && state.minute <= 59) {
+      if (state.use_12h) {
+        int hour12 = state.hour % 12;
+        if (hour12 == 0) hour12 = 12;
+        snprintf(value_buf, sizeof(value_buf), "%d:%02d", hour12, state.minute);
+        unit_text = state.hour < 12 ? "am" : "pm";
+      } else {
+        snprintf(value_buf, sizeof(value_buf), "%02d:%02d", state.hour, state.minute);
+      }
+      value_text = value_buf;
+      snprintf(label_buf, sizeof(label_buf), "%d %s", state.day, calendar_month_name(state.month));
+      label_text = label_buf;
+    }
+  } else if (state.date_valid &&
+             state.day >= 1 && state.day <= 31 &&
+             state.month >= 1 && state.month <= 12) {
+    snprintf(value_buf, sizeof(value_buf), "%d", state.day);
+    value_text = value_buf;
+    label_text = calendar_month_name(state.month);
   }
-  if (day_lbl) lv_label_set_text(day_lbl, day_text);
-  if (month_lbl) lv_label_set_text(month_lbl, month_text);
+  if (ref.value_lbl) lv_label_set_text(ref.value_lbl, value_text);
+  if (ref.unit_lbl) lv_label_set_text(ref.unit_lbl, unit_text);
+  if (ref.label_lbl) lv_label_set_text(ref.label_lbl, label_text);
 }
 
 inline void update_calendar_cards(bool valid, int day, int month) {
   CalendarDateState &state = calendar_date_state();
-  state.valid = valid && day >= 1 && day <= 31 && month >= 1 && month <= 12;
-  state.day = state.valid ? day : 0;
-  state.month = state.valid ? month : 0;
+  state.date_valid = valid && day >= 1 && day <= 31 && month >= 1 && month <= 12;
+  state.day = state.date_valid ? day : 0;
+  state.month = state.date_valid ? month : 0;
+  if (!state.date_valid && !state.time_valid) {
+    state.hour = 0;
+    state.minute = 0;
+    state.use_12h = false;
+  }
 
   CalendarCardRef *refs = calendar_card_refs();
   int count = calendar_card_count();
   for (int i = 0; i < count; i++) {
-    apply_calendar_card_text(refs[i].day_lbl, refs[i].month_lbl,
-                             state.valid, state.day, state.month);
+    apply_calendar_card_text(refs[i], state);
+  }
+}
+
+inline void update_calendar_cards_time(bool valid, int day, int month,
+                                       int hour, int minute, bool use_12h) {
+  CalendarDateState &state = calendar_date_state();
+  state.time_valid = valid &&
+                     day >= 1 && day <= 31 &&
+                     month >= 1 && month <= 12 &&
+                     hour >= 0 && hour <= 23 &&
+                     minute >= 0 && minute <= 59;
+  state.hour = state.time_valid ? hour : 0;
+  state.minute = state.time_valid ? minute : 0;
+  state.use_12h = state.time_valid ? use_12h : false;
+  if (state.time_valid) {
+    state.date_valid = true;
+    state.day = day;
+    state.month = month;
+  }
+
+  CalendarCardRef *refs = calendar_card_refs();
+  int count = calendar_card_count();
+  for (int i = 0; i < count; i++) {
+    apply_calendar_card_text(refs[i], state);
   }
 }
 
@@ -778,7 +841,8 @@ inline void subscribe_calendar_date_source(const std::string &entity_id) {
   );
 }
 
-inline void setup_calendar_card(BtnSlot &s, bool has_sensor_color, uint32_t sensor_val) {
+inline void setup_calendar_card(BtnSlot &s, const ParsedCfg &p,
+                                bool has_sensor_color, uint32_t sensor_val) {
   if (has_sensor_color) {
     lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
       static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
@@ -789,7 +853,7 @@ inline void setup_calendar_card(BtnSlot &s, bool has_sensor_color, uint32_t sens
   lv_label_set_text(s.sensor_lbl, "--");
   lv_label_set_text(s.unit_lbl, "");
   lv_label_set_text(s.text_lbl, "Date");
-  register_calendar_card(s.sensor_lbl, s.text_lbl);
+  register_calendar_card(s.sensor_lbl, s.unit_lbl, s.text_lbl, calendar_card_shows_time(p));
 }
 
 inline void setup_weather_card(BtnSlot &s, bool has_sensor_color, uint32_t sensor_val) {
@@ -1701,7 +1765,7 @@ inline void grid_phase1(
       continue;
     }
     if (p.type == "calendar") {
-      setup_calendar_card(s, has_sensor_color, sensor_val);
+      setup_calendar_card(s, p, has_sensor_color, sensor_val);
       continue;
     }
     if (p.type == "weather") {

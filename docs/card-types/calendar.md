@@ -6,19 +6,21 @@ description:
 
 # Date
 
-A date card shows the current date from Home Assistant. It uses the same layout as a numeric sensor card: the day number is shown large, and the month is shown as the label underneath.
+A date card can show either just the date, or the local date and time. In date-only mode, the large number shows the day and the label underneath shows the month. In date-and-time mode, the large number shows the local time and the label underneath shows the day and month.
 
 Date cards are read-only — tapping them does nothing.
 
 ## Setting Up a Date Card
 
 1. Select a card and change its type to **Date**.
-2. Apply the configuration so the panel restarts with the new card.
+2. Choose **Date only** or **Date & time** from the **Display** dropdown.
+3. Apply the configuration so the panel restarts with the new card.
 
 ## How It Works on the Panel
 
-- The day number updates from Home Assistant. The card reads `sensor.date`, and it also falls back to the panel's Home Assistant time source.
-- The month label follows the timezone selected in [Clock](/features/clock).
+- In **Date only** mode, the card reads `sensor.date`, and it also falls back to the panel's Home Assistant time source.
+- In **Date & time** mode, the large time display follows the timezone and 12/24-hour setting selected in [Clock](/features/clock).
+- The label underneath follows the same local timezone, so it stays matched to the time shown above.
 - The panel publishes a **Screen: Date** diagnostic value, so you can check whether the device currently knows the date.
 - The card uses the **tertiary** colour from [Appearance](/features/appearance), like sensor and weather cards.
 - If the panel has not synced time yet, the card shows `--` until time becomes available.
