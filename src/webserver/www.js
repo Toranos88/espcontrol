@@ -166,6 +166,14 @@
 
     ".sp-page{display:none}.sp-page.active{display:block}" +
 
+    ".sp-support-btn{position:fixed;right:18px;bottom:18px;z-index:150;display:inline-flex;" +
+    "align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;" +
+    "background:#ffdd00;color:#111;text-decoration:none;font-size:.875rem;font-weight:700;" +
+    "box-shadow:0 6px 18px rgba(0,0,0,.32);transition:transform .2s,box-shadow .2s,filter .2s}" +
+    ".sp-support-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.38);filter:brightness(1.03)}" +
+    ".sp-support-btn:active{transform:translateY(0);filter:brightness(.96)}" +
+    ".sp-support-btn .mdi{font-size:18px;line-height:1}" +
+
     ".fade-in{animation:fadeIn .3s ease}" +
     "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
 
@@ -520,6 +528,7 @@
     ":root{--gap:10px}" +
     ".sp-header{padding:0 10px}" +
     ".sp-tab{padding:0 10px;font-size:.75rem}" +
+    ".sp-support-btn{right:12px;bottom:12px;min-height:40px;padding:0 12px;font-size:.8rem}" +
     ".sp-color-row{flex-wrap:wrap}" +
     ".sp-backup-btns{flex-direction:column}" +
     ".sp-fw-row{flex-direction:column;align-items:flex-start;gap:12px}" +
@@ -1909,8 +1918,6 @@
     fonts.href = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap";
     document.head.appendChild(fonts);
 
-    loadSupportWidget();
-
     buildUI();
     syncClockBarUi();
     setupPreviewEvents();
@@ -1925,23 +1932,6 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") hideContextMenu();
     });
-  }
-
-  function loadSupportWidget() {
-    if (document.querySelector('script[data-name="BMC-Widget"][data-id="jtenniswood"]')) return;
-
-    var script = document.createElement("script");
-    script.setAttribute("data-name", "BMC-Widget");
-    script.setAttribute("data-cfasync", "false");
-    script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
-    script.setAttribute("data-id", "jtenniswood");
-    script.setAttribute("data-description", "Support me on Buy me a coffee!");
-    script.setAttribute("data-message", "");
-    script.setAttribute("data-color", "#FFDD00");
-    script.setAttribute("data-position", "Right");
-    script.setAttribute("data-x_margin", "18");
-    script.setAttribute("data-y_margin", "18");
-    document.head.appendChild(script);
   }
 
   // ── Build UI ───────────────────────────────────────────────────────────
@@ -1971,6 +1961,7 @@
     buildScreenPage(root);
     buildSettingsPage(root);
     buildLogsPage(root);
+    buildSupportButton(root);
 
     var app = document.querySelector("esp-app");
     if (app) {
@@ -1980,6 +1971,17 @@
     }
     els.root = root;
     switchTab("screen");
+  }
+
+  function buildSupportButton(parent) {
+    var support = document.createElement("a");
+    support.className = "sp-support-btn";
+    support.href = "https://www.buymeacoffee.com/jtenniswood";
+    support.target = "_blank";
+    support.rel = "noopener";
+    support.setAttribute("aria-label", "Buy me a coffee");
+    support.innerHTML = '<span class="mdi mdi-coffee"></span><span>Buy me a coffee</span>';
+    parent.appendChild(support);
   }
 
   function buildHeader(parent) {
