@@ -2329,7 +2329,7 @@
     tzSelect.value = state.timezone;
     tzSelect.addEventListener("change", function () {
       state.timezone = this.value;
-      postSelect("Screen: Timezone", this.value);
+      postText("Screen: Timezone", this.value);
       updateClock();
     });
     tzField.appendChild(tzSelect);
@@ -5425,6 +5425,11 @@
       "number-schedule_clock_brightness": function (val) {
         state.scheduleClockBrightness = normalizeScheduleClockBrightness(val);
         syncScreenScheduleUi();
+      },
+      "text-screen__timezone": function (val, d) {
+        state.timezone = d.value || val || state.timezone;
+        if (els.setTimezone) els.setTimezone.value = state.timezone;
+        updateClock();
       },
       "select-screen__timezone": function (val, d) {
         state.timezone = d.value || val || state.timezone;
