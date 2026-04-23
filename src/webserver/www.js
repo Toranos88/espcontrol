@@ -4165,13 +4165,16 @@
       state.subpageSelectedSlots = [newSlot];
       state.subpageLastClicked = newSlot;
       renderPreview();
-      renderButtonSettings();
+      renderButtonSettings(true);
     } else {
       var slot = firstFreeSlot();
       if (slot < 0) return;
       state.grid[pos] = slot;
       postText("Button Order", serializeGrid(state.grid));
-      selectButton(slot);
+      state.selectedSlots = [slot];
+      state.lastClickedSlot = slot;
+      renderPreview();
+      renderButtonSettings(true);
     }
   }
 
